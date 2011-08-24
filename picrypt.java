@@ -13,6 +13,30 @@ class Picrypt extends JFrame
     } catch (IOException e) { System.out.println(e); }
     
     getPixel(550, 550);
+    
+    int pixel = 0;
+    int[] color = {0, 0, 0};
+    for (int x=0; x < img.getWidth(); x++) {
+      for (int y=0; y < img.getHeight(); y++) {
+        pixel = getRgbAsInt(color);
+        setPixel(x, y, pixel);
+      }
+    }
+    
+    try {
+      File outputfile = new File("output.jpg");
+      ImageIO.write(img, "jpg", outputfile);
+    } catch (IOException e) { System.out.println(e); }
+  }
+  
+  public int getRgbAsInt(int[] rgb) {
+    int pixel = 0xff000000;
+    
+    pixel |= (rgb[0] << 16);
+    pixel |= (rgb[1] << 8);
+    pixel |= rgb[2];
+    
+    return pixel;
   }
   
   public int[] getPixel(int x, int y) {
@@ -27,6 +51,10 @@ class Picrypt extends JFrame
     System.out.println("Red: " + pixel[0] + ", Green: " + pixel[1] + ", Blue: " + pixel[2]);
     
     return pixel;
+  }
+  
+  public void setPixel(int x, int y, int pixel) {
+    img.setRGB(x, y, pixel);
   }
   
   public static void main(String args[]) {
