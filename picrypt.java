@@ -1,5 +1,6 @@
 import javax.swing.JFrame;
 import java.io.*;
+import java.io.FileInputStream;
 import javax.imageio.*;
 import java.awt.image.BufferedImage;
 
@@ -11,6 +12,19 @@ class Picrypt extends JFrame
     try {
         img = ImageIO.read(new File("sample.jpg"));
     } catch (IOException e) { System.out.println(e); }
+    
+    FileInputStream in = null;
+    byte[] input = new byte[1048576];
+    try {
+      in = new FileInputStream("resume.doc");
+      in.read(input, 0, 1048576);
+    }
+    catch (Exception e) { System.out.println(e); }
+    finally {
+      if (in != null) {
+          try { in.close(); } catch (Exception e) {}
+      }
+    }
     
     for (int x=0; x < img.getWidth(); x++) {
       for (int y=0; y < img.getHeight(); y++) {
