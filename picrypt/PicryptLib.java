@@ -7,10 +7,12 @@ import java.security.PublicKey;
 import java.security.KeyFactory;
 
 import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 public abstract class PicryptLib
 {	  
   public static final int PUB_KEY_SIZE = 550;
+  public static final int PRIV_KEY_SIZE = 2384;
 
   public static void embedFile(PublicKey pubKey, String fileInPath, String imgInPath, String imgOutPath) {
     RSA rsa = new RSA();
@@ -69,6 +71,45 @@ public abstract class PicryptLib
 		  X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(data);
           
 		  return keyFactory.generatePublic(pubSpec);
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		
+		return null;
+  }
+  
+  public static void embedPrivKey(String password, PrivateKey privKey, String imgInPath, String imgOutPath) {  
+    byte[] aesKey = AES.passwordToKey(password);
+    StegImg stegimgout = new StegImg(imgInPath);
+    
+    byte[] data = privKey.getEncoded();
+        
+    AES aes = new AES();
+    aes.setKey(aesKey);
+    data = aes.encrypt(data);
+    byte[] iv = aes.getIv();
+    
+    stegimgout.embedBytes(iv, byteCountToPixelCount(PUB_KEY_SIZE), iv.length);
+    stegimgout.embedBytes(data, byteCountToPixelCount(PUB_KEY_SIZE + AES.IV_LENGTH ), data.length);
+    stegimgout.saveImg(imgOutPath);
+  }
+  
+  public static PrivateKey extractPrivKey(String password, String imgPath) {
+    try {
+      byte[] aesKey = AES.passwordToKey(password);
+      StegImg stegimgin = new StegImg(imgPath);
+
+      byte[] iv = stegimgin.extractBytes(byteCountToPixelCount(PUB_KEY_SIZE), AES.IV_LENGTH);
+      byte[] data = stegimgin.extractBytes(byteCountToPixelCount(PUB_KEY_SIZE + AES.IV_LENGTH), PRIV_KEY_SIZE); 
+      
+      AES aes = new AES();
+      aes.setKey(aesKey);
+      aes.setIv(iv);
+      data = aes.decrypt(data);
+      
+      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		  PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(data);
+          
+		  return keyFactory.generatePrivate(privSpec);
 		}
 		catch (Exception e) { e.printStackTrace(); }
 		
