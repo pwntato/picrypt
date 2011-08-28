@@ -2,56 +2,101 @@ import javax.swing.JFrame;
 import java.io.*;
 import picrypt.*;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
 class Picrypt extends JFrame 
 {	
+  private PublicKey pubKey = null;
+  private PrivateKey privKey = null;
+  
   public Picrypt() {
+    RSA rsa = new RSA();
+    rsa.generateKeyPair();
+    pubKey = rsa.getPubKey();
+    privKey = rsa.getPrivKey();
+    
+    int length = embedFile("sample.doc", "sample.jpg", "output.png");       
+       
+    extractFile("output.png", "output.doc", length);
+  }
+  
+  public int embedFile(String fileInPath, String imgInPath, String imgOutPath) {
+    RSA rsa = new RSA();
+    rsa.setPubKey(pubKey);
+    rsa.setPrivKey(privKey);
+  
     byte[] aesKey = AES.passwordToKey("test");
-    byte[] iv = null;
     AES aes = new AES();
     aes.setKey(aesKey);
   
-    StegImg stegimgout = new StegImg("sample.jpg");
+    StegImg stegimgout = new StegImg(imgInPath);
+    
+    byte[] data = getFileAsBytes(fileInPath);
+    data = aes.encrypt(data);
+    
+    int length = data.length;
+    
+    byte[] keyAndIv = aes.getKeyAndIv();
+    keyAndIv = rsa.encrypt(keyAndIv);
+    
+    stegimgout.embedBytes(keyAndIv, 0, RSA.HEADER_LENGTH);
+    stegimgout.embedBytes(data, 1000, length);
+    stegimgout.saveImg(imgOutPath);
+    
+    return length;
+  }
+  
+  public void extractFile(String imgPath, String filePath, int length) {
+    StegImg stegimgin = new StegImg(imgPath);
+    byte[] header = stegimgin.extractBytes(0, RSA.HEADER_LENGTH);
+    
+    RSA rsa = new RSA();
+    rsa.setPubKey(pubKey);
+    rsa.setPrivKey(privKey);
+    header = rsa.decrypt(header);
+    
+    AES aes = new AES();
+    aes.setKeyAndIv(header);
+       
+    byte[] data = stegimgin.extractBytes(1000, length);      
+    data = aes.decrypt(data);
+    saveFile(filePath, data);
+  }
+  
+  public byte[] getFileAsBytes(String path) {
     FileInputStream inputfile = null;
-    int length = 0;
+    
     try {
       inputfile = new FileInputStream("sample.doc");
-      length = inputfile.available();
+      int length = inputfile.available();
       byte[] data = new byte[length];
       inputfile.read(data, 0, length);
       
-      data = aes.encrypt(data);
-      iv = aes.getIv();
-      length = data.length;
-      
-      stegimgout.embedBytes(data, 1000, length);
+      return data;
     }
-    catch (Exception e) { System.out.println(e); }
+    catch (Exception e) { e.printStackTrace(); }
     finally {
       if (inputfile != null) {
           try { inputfile.close(); } catch (Exception e) {}
       }
     }
-    stegimgout.saveImg("output.png");
     
-    StegImg stegimgin = new StegImg("output.png");
+    return null;
+  }
+  
+  public void saveFile(String path, byte[] data) {
     FileOutputStream outputfile = null;    
-    try {
-      byte[] data = stegimgin.extractBytes(1000, length);
-      aes.setKey(aesKey);
-      aes.setIv(iv);
-      data = aes.decrypt(data);
-      outputfile = new FileOutputStream("output.doc");
+    
+    try {      
+      outputfile = new FileOutputStream(path);
       outputfile.write(data, 0, data.length);
     } catch (IOException e) { System.out.println(e); }
     finally {
       if (outputfile != null) {
-          try { outputfile.close(); } catch (Exception e) {}
+        try { outputfile.close(); } catch (Exception e) {}
       }
     }
-  }
-  
-  public void printPixel(int x, int y, int[] pixel) {
-    System.out.println("Pixel (" + x + ", " + y + "): " + pixel[0] + ", " + pixel[1] + ", " + pixel[2]);
   }
   
   public void printBinary(int data) {

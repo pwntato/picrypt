@@ -74,6 +74,35 @@ public class AES
     k = new SecretKeySpec(key, "AES");
   }
 
+  public byte[] getKeyAndIv() {
+    byte[] keyAndIv = new byte[KEY_LENGTH+IV_LENGTH];
+    
+    for (int i=0; i<KEY_LENGTH+IV_LENGTH; i++) {
+      if (i < KEY_LENGTH) {
+        keyAndIv[i] = key[i];
+      }
+      else {
+        keyAndIv[i] = iv[i-KEY_LENGTH];
+      }
+    }
+    
+    return keyAndIv;
+  }
+  
+  public void setKeyAndIv(byte[] keyAndIv) {
+    key = new byte[KEY_LENGTH];
+    iv = new byte[IV_LENGTH];
+    for (int i=0; i<KEY_LENGTH+IV_LENGTH; i++) {
+      if (i < KEY_LENGTH) {
+        key[i] = keyAndIv[i];
+      }
+      else {
+        iv[i-KEY_LENGTH] = keyAndIv[i];
+      }
+    }
+    k = new SecretKeySpec(key, "AES");
+  }
+
   public byte[] getKey() {
     return key;
   }
