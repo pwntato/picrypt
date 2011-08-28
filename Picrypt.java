@@ -7,13 +7,14 @@ class Picrypt extends JFrame
   public Picrypt() {
     StegImg stegimgout = new StegImg("sample.jpg");
     FileInputStream inputfile = null;
-    byte[] input = new byte[1048576];
     int length = 0;
     try {
       inputfile = new FileInputStream("sample.doc");
-      length = inputfile.read(input, 0, 1048576);
+      length = inputfile.available();
+      byte[] data = new byte[length];
+      inputfile.read(data, 0, length);
       
-      stegimgout.embedBytes(input, 0, length);
+      stegimgout.embedBytes(data, 1000, length);
     }
     catch (Exception e) { System.out.println(e); }
     finally {
@@ -26,7 +27,7 @@ class Picrypt extends JFrame
     StegImg stegimgin = new StegImg("output.png");
     FileOutputStream outputfile = null;    
     try {
-      byte[] data = stegimgin.extractBytes(0, length);
+      byte[] data = stegimgin.extractBytes(1000, length);
       outputfile = new FileOutputStream("output.doc");
       outputfile.write(data, 0, length);
     } catch (IOException e) { System.out.println(e); }
