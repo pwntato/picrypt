@@ -13,8 +13,8 @@ import javax.crypto.IllegalBlockSizeException;
 
 public class RSA 
 {
-  public static final int MAX_PAYLOAD = 256;
-  public static final int HEADER_LENGTH = 128;
+  public static final int KEY_SIZE = 4096;
+  public static final int HEADER_LENGTH = KEY_SIZE / 8;
   
   private PublicKey pubKey = null;
   private PrivateKey privKey = null;
@@ -44,6 +44,7 @@ public class RSA
   public void generateKeyPair() {
      try {
       KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+      kpg.initialize(KEY_SIZE);
       KeyPair keys = kpg.generateKeyPair();
       
       pubKey = keys.getPublic();
