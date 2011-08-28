@@ -18,8 +18,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class AES 
 {
-  public static final int KEY_LENGTH = 32;
+  public static final int KEY_SIZE = 256;               // or 128
+  public static final int KEY_LENGTH = KEY_SIZE / 8;
   public static final int IV_LENGTH = 16;
+  public static final String HASH_ALGO = "SHA-256";     // use "MD5" for 128
   
   private byte[] key = null;
   private byte[] iv = null;
@@ -29,12 +31,12 @@ public class AES
   
   public static byte[] passwordToKey(String password) {
     try {
-      MessageDigest sha = MessageDigest.getInstance("SHA-256");
+      MessageDigest hash = MessageDigest.getInstance(HASH_ALGO);
       
-      sha.update(password.getBytes(), 0, password.length());
-      byte[] sha_password = sha.digest();
+      hash.update(password.getBytes(), 0, password.length());
+      byte[] hash_password = hash.digest();
       
-      return sha_password;
+      return hash_password;
     } catch (NoSuchAlgorithmException e) { e.printStackTrace(); }
     
     return null;
@@ -68,7 +70,7 @@ public class AES
       kgen = KeyGenerator.getInstance("AES");
     } catch (Exception ex)  {}
     
-    kgen.init(256); 
+    kgen.init(KEY_SIZE); 
     SecretKey skey = kgen.generateKey();
     key = skey.getEncoded();
     k = new SecretKeySpec(key, "AES");
