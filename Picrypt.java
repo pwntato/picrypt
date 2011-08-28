@@ -8,11 +8,14 @@ import java.security.PublicKey;
 class Picrypt extends JFrame 
 {	  
   public static void main(String args[]) {
+    //byte[] aesKey = AES.passwordToKey("test");
     RSA rsa = new RSA();
     rsa.generateKeyPair();
     
-    PicryptLib.embedFile(rsa.getPubKey(), "sample.doc", "sample.jpg", "output.png");       
-       
+    PicryptLib.embedPubKey(rsa.getPubKey(), "sample.jpg", "output.pubKey.png");
+    
+    PicryptLib.embedFile(PicryptLib.extractPubKey("output.pubKey.png"), "sample.doc", "sample.jpg", "output.png");       
+    
     PicryptLib.extractFile(rsa.getPrivKey(), "output.png", "output.doc");
   }
 }
