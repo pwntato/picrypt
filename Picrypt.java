@@ -5,6 +5,11 @@ import picrypt.*;
 class Picrypt extends JFrame 
 {	
   public Picrypt() {
+    byte[] aesKey = AES.passwordToKey("test");
+    byte[] iv = null;
+    AES aes = new AES();
+    aes.setKey(aesKey);
+  
     StegImg stegimgout = new StegImg("sample.jpg");
     FileInputStream inputfile = null;
     int length = 0;
@@ -13,6 +18,10 @@ class Picrypt extends JFrame
       length = inputfile.available();
       byte[] data = new byte[length];
       inputfile.read(data, 0, length);
+      
+      data = aes.encrypt(data);
+      iv = aes.getIv();
+      length = data.length;
       
       stegimgout.embedBytes(data, 1000, length);
     }
@@ -28,8 +37,11 @@ class Picrypt extends JFrame
     FileOutputStream outputfile = null;    
     try {
       byte[] data = stegimgin.extractBytes(1000, length);
+      aes.setKey(aesKey);
+      aes.setIv(iv);
+      data = aes.decrypt(data);
       outputfile = new FileOutputStream("output.doc");
-      outputfile.write(data, 0, length);
+      outputfile.write(data, 0, data.length);
     } catch (IOException e) { System.out.println(e); }
     finally {
       if (outputfile != null) {
