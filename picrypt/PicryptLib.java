@@ -30,7 +30,7 @@ public abstract class PicryptLib
     keyAndIv = rsa.encrypt(keyAndIv);
     
     stegimgout.embedBytes(keyAndIv, 0, RSA.HEADER_LENGTH);
-    stegimgout.embedBytes(data, 1000, length);
+    stegimgout.embedBytes(data, byteCountToPixelCount(RSA.HEADER_LENGTH), length);
     stegimgout.saveImg(imgOutPath);
   }
   
@@ -45,7 +45,7 @@ public abstract class PicryptLib
     AES aes = new AES();
     int length = aes.setKeyAndIv(header);
        
-    byte[] data = stegimgin.extractBytes(1000, length);      
+    byte[] data = stegimgin.extractBytes(byteCountToPixelCount(RSA.HEADER_LENGTH), length);      
     data = aes.decrypt(data);
     saveFile(filePath, data);
   }
@@ -108,6 +108,11 @@ public abstract class PicryptLib
         try { outputfile.close(); } catch (Exception e) {}
       }
     }
+  }
+  
+  public static int byteCountToPixelCount(int byteCount) {
+    double pixelCount = byteCount * (8.0 / 6.0);
+    return pixelCount % 1 == 0.0 ? (int)pixelCount : (int)pixelCount + 1;
   }
 }
 
