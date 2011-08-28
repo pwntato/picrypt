@@ -74,33 +74,52 @@ public class AES
     k = new SecretKeySpec(key, "AES");
   }
 
-  public byte[] getKeyAndIv() {
-    byte[] keyAndIv = new byte[KEY_LENGTH+IV_LENGTH];
+  public byte[] getKeyAndIv(int length) {
+    byte[] keyAndIv = new byte[KEY_LENGTH+IV_LENGTH+4];
+    byte[] bLength = intToByteArray(length);
     
-    for (int i=0; i<KEY_LENGTH+IV_LENGTH; i++) {
+    for (int i=0; i<KEY_LENGTH+IV_LENGTH+4; i++) {
       if (i < KEY_LENGTH) {
         keyAndIv[i] = key[i];
       }
-      else {
+      else if (i < KEY_LENGTH + IV_LENGTH) {
         keyAndIv[i] = iv[i-KEY_LENGTH];
+      }
+      else {
+        keyAndIv[i] = bLength[i-KEY_LENGTH-IV_LENGTH];
       }
     }
     
     return keyAndIv;
   }
   
-  public void setKeyAndIv(byte[] keyAndIv) {
+  public int setKeyAndIv(byte[] keyAndIv) {
+    byte[] bLength = new byte[4];
     key = new byte[KEY_LENGTH];
     iv = new byte[IV_LENGTH];
-    for (int i=0; i<KEY_LENGTH+IV_LENGTH; i++) {
+    
+    for (int i=0; i<KEY_LENGTH+IV_LENGTH+4; i++) {
       if (i < KEY_LENGTH) {
         key[i] = keyAndIv[i];
       }
-      else {
+      else if (i < KEY_LENGTH + IV_LENGTH) {
         iv[i-KEY_LENGTH] = keyAndIv[i];
+      }
+      else {
+        bLength[i-KEY_LENGTH-IV_LENGTH] = keyAndIv[i];
       }
     }
     k = new SecretKeySpec(key, "AES");
+    
+    return byteArrayToInt(bLength);
+  }
+  
+  public byte[] intToByteArray(int value) {
+    return new byte[] { (byte)(value >>> 24), (byte)(value >>> 16), (byte)(value >>> 8), (byte)value };
+  }
+  
+  public int byteArrayToInt(byte [] data) {
+    return (data[0] << 24) + ((data[1] & 0x000000ff) << 16) + ((data[2] & 0x000000ff) << 8) + (data[3] & 0x000000ff);
   }
 
   public byte[] getKey() {

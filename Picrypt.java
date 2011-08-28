@@ -16,12 +16,12 @@ class Picrypt extends JFrame
     pubKey = rsa.getPubKey();
     privKey = rsa.getPrivKey();
     
-    int length = embedFile("sample.doc", "sample.jpg", "output.png");       
+    embedFile("sample.doc", "sample.jpg", "output.png");       
        
-    extractFile("output.png", "output.doc", length);
+    extractFile("output.png", "output.doc");
   }
   
-  public int embedFile(String fileInPath, String imgInPath, String imgOutPath) {
+  public void embedFile(String fileInPath, String imgInPath, String imgOutPath) {
     RSA rsa = new RSA();
     rsa.setPubKey(pubKey);
     rsa.setPrivKey(privKey);
@@ -37,17 +37,15 @@ class Picrypt extends JFrame
     
     int length = data.length;
     
-    byte[] keyAndIv = aes.getKeyAndIv();
+    byte[] keyAndIv = aes.getKeyAndIv(length);
     keyAndIv = rsa.encrypt(keyAndIv);
     
     stegimgout.embedBytes(keyAndIv, 0, RSA.HEADER_LENGTH);
     stegimgout.embedBytes(data, 1000, length);
     stegimgout.saveImg(imgOutPath);
-    
-    return length;
   }
   
-  public void extractFile(String imgPath, String filePath, int length) {
+  public void extractFile(String imgPath, String filePath) {
     StegImg stegimgin = new StegImg(imgPath);
     byte[] header = stegimgin.extractBytes(0, RSA.HEADER_LENGTH);
     
@@ -57,7 +55,7 @@ class Picrypt extends JFrame
     header = rsa.decrypt(header);
     
     AES aes = new AES();
-    aes.setKeyAndIv(header);
+    int length = aes.setKeyAndIv(header);
        
     byte[] data = stegimgin.extractBytes(1000, length);      
     data = aes.decrypt(data);
