@@ -16,8 +16,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class AES 
-{
+public class AES {
   public static final int KEY_SIZE = 256;               // or 128
   public static final int KEY_LENGTH = KEY_SIZE / 8;
   public static final int IV_LENGTH = 16;

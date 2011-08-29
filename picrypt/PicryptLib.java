@@ -9,8 +9,7 @@ import java.security.KeyFactory;
 import java.security.spec.X509EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 
-public abstract class PicryptLib
-{	  
+public abstract class PicryptLib {	  
   public static final int PUB_KEY_SIZE = 550;
   public static final int PRIV_KEY_SIZE = 2384;
 

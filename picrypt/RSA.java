@@ -11,8 +11,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 
-public class RSA 
-{
+public class RSA {
   public static final int KEY_SIZE = 4096;
   public static final int HEADER_LENGTH = KEY_SIZE / 8;
   
