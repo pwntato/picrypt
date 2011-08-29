@@ -14,9 +14,11 @@ class Picrypt extends JFrame
     PicryptLib.embedPubKey(rsa.getPubKey(), "sample.jpg", "output.pubKey.png");
     PicryptLib.embedKey("password", rsa.getPubKey(), rsa.getPrivKey(), "sample.jpg", "output.key.png");
     
-    PicryptLib.embedFile(PicryptLib.extractPubKey("output.pubKey.png"), "sample.doc", "sample.jpg", "output.png");     
+    PicryptLib.embedFile(PicryptLib.extractPubKey("output.pubKey.png"), "~/java/picrypt/sample.doc", "sample.jpg", "output.png");     
     
-    PicryptLib.extractFile(PicryptLib.extractPrivKey("password", "output.key.png"), "output.png", "output.doc");
+    PrivateKey privKey = PicryptLib.extractPrivKey("password", "output.key.png");
+    String suggestedFileName = PicryptLib.getSuggestedFileName(privKey, "output.png");
+    PicryptLib.extractFile(privKey, "output.png", suggestedFileName);
   }
 }
 

@@ -28,28 +28,49 @@ public abstract class PicryptLib
     
     int length = data.length;
     
-    byte[] keyAndIv = aes.getKeyAndIv(length);
-    keyAndIv = rsa.encrypt(keyAndIv);
+    byte[] header = aes.getKeyAndIv();
+    header = catArrays(header, intToByteArray(length));
     
-    stegimgout.embedBytes(keyAndIv, 0, RSA.HEADER_LENGTH);
+    header = catArrays(header, (new File(fileInPath)).getName().getBytes());
+    header = rsa.encrypt(header);
+    
+    stegimgout.embedBytes(header, 0, RSA.HEADER_LENGTH);
     stegimgout.embedBytes(data, byteCountToPixelCount(RSA.HEADER_LENGTH), length);
     stegimgout.saveImg(imgOutPath);
   }
   
   public static void extractFile(PrivateKey privKey, String imgPath, String filePath) {
     StegImg stegimgin = new StegImg(imgPath);
-    byte[] header = stegimgin.extractBytes(0, RSA.HEADER_LENGTH);
     
-    RSA rsa = new RSA();
-    rsa.setPrivKey(privKey);
-    header = rsa.decrypt(header);
+    byte[] header = getHeader(privKey, stegimgin);
     
     AES aes = new AES();
-    int length = aes.setKeyAndIv(header);
+    aes.setKeyAndIv(sliceArray(header, 0, AES.KEY_LENGTH + AES.IV_LENGTH));
+    int length = byteArrayToInt(sliceArray(header, AES.KEY_LENGTH + AES.IV_LENGTH, AES.KEY_LENGTH + AES.IV_LENGTH + 4));
        
     byte[] data = stegimgin.extractBytes(byteCountToPixelCount(RSA.HEADER_LENGTH), length);      
     data = aes.decrypt(data);
     saveFile(filePath, data);
+  }
+  
+  public static byte[] getHeader(PrivateKey privKey, String imgPath) {
+    StegImg stegimgin = new StegImg(imgPath);
+    return getHeader(privKey, stegimgin);
+  }
+  
+  public static byte[] getHeader(PrivateKey privKey, StegImg stegimgin) {
+    byte[] header = stegimgin.extractBytes(0, RSA.HEADER_LENGTH);
+    
+    RSA rsa = new RSA();
+    rsa.setPrivKey(privKey);
+    return rsa.decrypt(header);
+  }
+  
+  public static String getSuggestedFileName(PrivateKey privKey, String imgPath) {
+    byte[] header = getHeader(privKey, imgPath);
+    String suggestedName = new String(sliceArray(header, AES.KEY_LENGTH + AES.IV_LENGTH + 4, header.length));
+    suggestedName = "output." + suggestedName;
+    return suggestedName;
   }
   
   public static void embedPubKey(PublicKey pubKey, String imgInPath, String imgOutPath) {  
@@ -153,6 +174,35 @@ public abstract class PicryptLib
         try { outputfile.close(); } catch (Exception e) {}
       }
     }
+  }
+  
+  public static byte[] catArrays(byte[] arr1, byte[] arr2) {
+    byte[] out = new byte[arr1.length+arr2.length];
+    for (int i=0; i<arr1.length+arr2.length; i++) {
+      if (i < arr1.length) {
+        out[i] = arr1[i];
+      }
+      else {
+        out[i] = arr2[i-arr1.length];
+      }
+    }
+    return out;
+  }
+  
+  public static byte[] sliceArray(byte[] arr, int start, int end) {
+    byte[] slice = new byte[end-start];
+    for (int i=start; i<end; i++) {
+      slice[i-start] = arr[i];
+    }
+    return slice;
+  }
+  
+  public static byte[] intToByteArray(int value) {
+    return new byte[] { (byte)(value >>> 24), (byte)(value >>> 16), (byte)(value >>> 8), (byte)value };
+  }
+  
+  public static int byteArrayToInt(byte [] data) {
+    return (data[0] << 24) + ((data[1] & 0x000000ff) << 16) + ((data[2] & 0x000000ff) << 8) + (data[3] & 0x000000ff);
   }
   
   public static int byteCountToPixelCount(int byteCount) {
