@@ -12,11 +12,11 @@ class Picrypt extends JFrame
     rsa.generateKeyPair();
     
     PicryptLib.embedPubKey(rsa.getPubKey(), "sample.jpg", "output.pubKey.png");
-    PicryptLib.embedPrivKey("password", rsa.getPrivKey(), "sample.jpg", "output.privKey.png");
+    PicryptLib.embedKey("password", rsa.getPubKey(), rsa.getPrivKey(), "sample.jpg", "output.key.png");
     
     PicryptLib.embedFile(PicryptLib.extractPubKey("output.pubKey.png"), "sample.doc", "sample.jpg", "output.png");     
     
-    PicryptLib.extractFile(PicryptLib.extractPrivKey("password", "output.privKey.png"), "output.png", "output.doc");
+    PicryptLib.extractFile(PicryptLib.extractPrivKey("password", "output.key.png"), "output.png", "output.doc");
   }
 }
 

@@ -77,11 +77,15 @@ public abstract class PicryptLib
 		return null;
   }
   
-  public static void embedPrivKey(String password, PrivateKey privKey, String imgInPath, String imgOutPath) {  
+  public static void embedKey(String password, PublicKey pubKey, PrivateKey privKey, String imgInPath, String imgOutPath) {  
     byte[] aesKey = AES.passwordToKey(password);
     StegImg stegimgout = new StegImg(imgInPath);
     
-    byte[] data = privKey.getEncoded();
+    byte[] data = pubKey.getEncoded();
+    
+    stegimgout.embedBytes(data, 0, data.length);
+    
+    data = privKey.getEncoded();
         
     AES aes = new AES();
     aes.setKey(aesKey);
