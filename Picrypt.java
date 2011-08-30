@@ -16,7 +16,18 @@ class Picrypt extends JFrame implements ActionListener {
 	  setDefaultCloseOperation(EXIT_ON_CLOSE);
 	  
 		Container container = getContentPane();
-		container.setLayout(new GridLayout(2, 2));
+		container.setLayout(new FlowLayout());
+		
+		JMenuBar menuBar = new JMenuBar();
+		JMenu fileMenu = new JMenu("File");
+		menuBar.add(fileMenu);
+				
+		fileMenu.add(setupMenu("Import Image"));	
+		fileMenu.add(setupMenu("Embed Image"));		
+		fileMenu.addSeparator();
+		fileMenu.add(setupMenu("Exit"));
+		
+		setJMenuBar(menuBar);
 		
 		Container importImage = new Container();
 		importImage.setLayout(new FlowLayout());
@@ -44,7 +55,23 @@ class Picrypt extends JFrame implements ActionListener {
       runTests();   // don't do this is the ui thread
       output.setText("Tests Completed");
     }
+    else if ("import_image".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Import Image");
+    }
+    else if ("embed_image".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Embed Image");
+    }
+    else if ("exit".equals(e.getActionCommand())) {
+      System.exit(0);
+    }
   } 
+  
+  public JMenuItem setupMenu(String menuText) {
+		JMenuItem menuItem = new JMenuItem(menuText);
+		menuItem.setActionCommand(menuText.replace(" ", "_").toLowerCase());
+		menuItem.addActionListener(this);
+		return menuItem;
+  }
   
   public void runTests() {
     RSA rsa = new RSA();
