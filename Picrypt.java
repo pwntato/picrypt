@@ -18,16 +18,7 @@ class Picrypt extends JFrame implements ActionListener {
 		Container container = getContentPane();
 		container.setLayout(new FlowLayout());
 		
-		JMenuBar menuBar = new JMenuBar();
-		JMenu fileMenu = new JMenu("File");
-		menuBar.add(fileMenu);
-				
-		fileMenu.add(setupMenu("Import Image"));	
-		fileMenu.add(setupMenu("Embed Image"));		
-		fileMenu.addSeparator();
-		fileMenu.add(setupMenu("Exit"));
-		
-		setJMenuBar(menuBar);
+		setUpMenu();
 		
 		Container importImage = new Container();
 		importImage.setLayout(new FlowLayout());
@@ -48,6 +39,28 @@ class Picrypt extends JFrame implements ActionListener {
 		this.setSize(800, 800);
 		setVisible(true);
   }
+  
+  public void setUpMenu() {
+    JMenuBar menuBar = new JMenuBar();
+		
+		JMenu fileMenu = new JMenu("File");
+		menuBar.add(fileMenu);
+				
+		fileMenu.add(setupMenu("Extract File From Image"));	
+		fileMenu.add(setupMenu("Embed File In Image"));		
+		fileMenu.addSeparator();
+		fileMenu.add(setupMenu("Exit"));
+		
+		JMenu keyMenu = new JMenu("Manage Keys");
+		menuBar.add(keyMenu);
+		
+		keyMenu.add(setupMenu("Create New Contact"));	
+		keyMenu.add(setupMenu("Change Password"));	
+		keyMenu.add(setupMenu("Import Contact Info"));	
+		keyMenu.add(setupMenu("Export Contact Info"));	
+		
+		setJMenuBar(menuBar);
+  }
 	
 	public void actionPerformed(ActionEvent e) {
     if ("run_tests".equals(e.getActionCommand())) {
@@ -55,20 +68,35 @@ class Picrypt extends JFrame implements ActionListener {
       runTests();   // don't do this is the ui thread
       output.setText("Tests Completed");
     }
-    else if ("import_image".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Import Image");
+    else if ("Extract File From Image".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Extract File From Image");
     }
-    else if ("embed_image".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Embed Image");
+    else if ("Embed File In Image".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Embed File In Image");
     }
-    else if ("exit".equals(e.getActionCommand())) {
+    else if ("Create New Contact".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Create New Contact");
+    }
+    else if ("Change Password".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Change Password");
+    }
+    else if ("Import Contact Info".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Import Contact Info");
+    }
+    else if ("Export Contact Info".equals(e.getActionCommand())) {
+      JOptionPane.showMessageDialog(this, "Export Contact Info");
+    }
+    else if ("Exit".equals(e.getActionCommand())) {
       System.exit(0);
+    }
+    else {
+      JOptionPane.showMessageDialog(this, "Unhandled action: " + e.getActionCommand());
     }
   } 
   
   public JMenuItem setupMenu(String menuText) {
 		JMenuItem menuItem = new JMenuItem(menuText);
-		menuItem.setActionCommand(menuText.replace(" ", "_").toLowerCase());
+		menuItem.setActionCommand(menuText);
 		menuItem.addActionListener(this);
 		return menuItem;
   }
