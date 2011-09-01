@@ -9,8 +9,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 class Picrypt extends JFrame implements ActionListener {	
-  private JLabel output = null;
-    
   public Picrypt() {
 	  super("Picrypt - Securely Embed Files in Pictures");
 	  setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -18,29 +16,23 @@ class Picrypt extends JFrame implements ActionListener {
 		Container container = getContentPane();
 		container.setLayout(new FlowLayout());
 		
-		setUpMenu();
+		setupMenu();
 		
-		Container importImage = new Container();
-		importImage.setLayout(new FlowLayout());
-		JLabel importLabel = new JLabel("Import an Image");
-		importImage.add(importLabel);
-		container.add(importImage);
+		container.add(setupButton("Create Contact Info"));
 		
 		JTextField input = new JTextField(30);
 		JButton run_tests = new JButton("Run Tests");
 		run_tests.setActionCommand("run_tests");
 		run_tests.addActionListener(this);
-		output = new JLabel("Status");
 		
 		container.add(input);
 		container.add(run_tests);
-		container.add(output);
 		
 		this.setSize(800, 800);
 		setVisible(true);
   }
   
-  public void setUpMenu() {
+  public void setupMenu() {
     JMenuBar menuBar = new JMenuBar();
 		
 		JMenu fileMenu = new JMenu("File");
@@ -64,9 +56,7 @@ class Picrypt extends JFrame implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
     if ("run_tests".equals(e.getActionCommand())) {
-      output.setText("Running Tests");
       runTests();   // don't do this is the ui thread
-      output.setText("Tests Completed");
     }
     else if ("Extract File From Image".equals(e.getActionCommand())) {
       JOptionPane.showMessageDialog(this, "Extract File From Image");
@@ -99,6 +89,13 @@ class Picrypt extends JFrame implements ActionListener {
 		menuItem.setActionCommand(menuText);
 		menuItem.addActionListener(this);
 		return menuItem;
+  }
+  
+  public JButton setupButton(String buttonText) {
+		JButton button = new JButton(buttonText);
+		button.setActionCommand(buttonText);
+		button.addActionListener(this);
+		return button;
   }
   
   public void runTests() {
