@@ -9,6 +9,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 class Picrypt extends JFrame implements ActionListener {	
+  public static final String KEY_STORE = "keys/";
+
   private Container container = null;
 
   private JTextField name = null;
@@ -26,6 +28,7 @@ class Picrypt extends JFrame implements ActionListener {
 		
 		setupMenu();
 		
+		this.setResizable(false);
 		this.setSize(510, 370);
 		setVisible(true);
   }
@@ -50,6 +53,20 @@ class Picrypt extends JFrame implements ActionListener {
 		keyMenu.add(setupMenu("Export Contact Info"));	
 		
 		setJMenuBar(menuBar);
+  }
+  
+  public void setupEmbedImageDlg() {
+    this.setSize(510, 370);
+  
+    GridBagConstraints gridProps = null;
+  
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 0;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Encrypt to:"), gridProps);
+		
+		
   }
   
   public void setupNewKeyDlg() {
@@ -182,8 +199,9 @@ class Picrypt extends JFrame implements ActionListener {
     
     pubKey.setText(Base64.encodeBytes(rawPub));
     
+    (new File(KEY_STORE)).mkdir();
     byte[] toFile = PicryptLib.catArrays(aesPriv, rawPub);
-    PicryptLib.saveFile(name.getText().replace(' ', '_').toLowerCase() + ".key", toFile);
+    PicryptLib.saveFile(KEY_STORE + name.getText().replace(' ', '_') + ".key", toFile);
   }
   
   public JMenuItem setupMenu(String menuText) {
