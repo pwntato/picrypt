@@ -9,8 +9,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 class Picrypt extends JFrame implements ActionListener {	
+  private JTextField name = null;
   private JPasswordField newPassword1 = null;
   private JPasswordField newPassword2 = null;
+  private JTextArea pubKey = null;
 
   public Picrypt() {
 	  super("Picrypt - Securely Embed Files in Pictures");
@@ -18,57 +20,68 @@ class Picrypt extends JFrame implements ActionListener {
 	  
 		Container container = getContentPane();
 		container.setLayout(new GridBagLayout());
-		GridBagConstraints gridProps = new GridBagConstraints();
+		GridBagConstraints gridProps = null;
 		
 		setupMenu();
 				
+		gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
 		gridProps.gridy = 0;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Enter name:"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 0;
+		name = new JTextField(30);
+		container.add(name, gridProps);
+				
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 1;
 		gridProps.anchor = GridBagConstraints.LINE_END;
 		container.add(new JLabel("Enter password:"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
-		gridProps.gridy = 0;
+		gridProps.gridy = 1;
 		newPassword1 = new JPasswordField(30);
 		container.add(newPassword1, gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
-		gridProps.gridy = 1;
+		gridProps.gridy = 2;
 		gridProps.anchor = GridBagConstraints.LINE_END;
 		container.add(new JLabel("Enter password again:"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
-		gridProps.gridy = 1;
+		gridProps.gridy = 2;
 		newPassword2 = new JPasswordField(30);
 		container.add(newPassword2, gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
-		gridProps.gridy = 2;
+		gridProps.gridy = 3;
 		gridProps.gridwidth = 2;
 		container.add(setupButton("Create Contact Info"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
-		gridProps.gridy = 3;
+		gridProps.gridy = 4;
 		gridProps.gridwidth = 2;
 		container.add(new JLabel("<html><div align='center'><strong>Picrypt contact information</strong><br/><br/>(Allows people to send you files hidden in images)</div></html>"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
-		gridProps.gridy = 4;
+		gridProps.gridy = 5;
 		gridProps.gridwidth = 2;
 		gridProps.fill = GridBagConstraints.BOTH;
-		JTextArea pubKey = new JTextArea();
+		pubKey = new JTextArea();
+		pubKey.setRows(5);
+		pubKey.setLineWrap(true);
+    pubKey.setWrapStyleWord(false);
 		container.add(pubKey, gridProps);
-		
-		//JTextField input = new JTextField(30);
-		//container.add(setupButton("Run Tests"));
-		
-		//container.add(input);
 		
 		this.setSize(800, 800);
 		setVisible(true);
@@ -122,7 +135,22 @@ class Picrypt extends JFrame implements ActionListener {
       String pwd1 = new String(newPassword1.getPassword());
       String pwd2 = new String(newPassword2.getPassword());
       if (pwd1.equals(pwd2)) {
-        JOptionPane.showMessageDialog(this, pwd1);
+        RSA rsa = new RSA();
+        rsa.generateKeyPair();
+        
+        byte[] rawPub = PicryptLib.catArrays(rsa.getPubKey().getEncoded(), name.getText().getBytes());
+        
+        byte[] aesKey = AES.passwordToKey(pwd1);
+        AES aes = new AES();
+        aes.setKey(aesKey);
+        byte[] rawPriv = aes.encrypt(rsa.getPrivKey().getEncoded());
+        byte[] iv = aes.getIv(); 
+        byte[] aesPriv = PicryptLib.catArrays(iv, rawPriv);
+        
+        pubKey.setText(Base64.encodeBytes(rawPub));
+        
+        byte[] toFile = PicryptLib.catArrays(aesPriv, rawPub);
+        PicryptLib.saveFile(name.getText().replace(' ', '_').toLowerCase() + ".key", toFile);
       }
       else {
         JOptionPane.showMessageDialog(this, "Passwords don't match");
