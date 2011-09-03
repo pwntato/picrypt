@@ -9,6 +9,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 class Picrypt extends JFrame implements ActionListener {	
+  private Container container = null;
+
   private JTextField name = null;
   private JPasswordField newPassword1 = null;
   private JPasswordField newPassword2 = null;
@@ -18,13 +20,45 @@ class Picrypt extends JFrame implements ActionListener {
 	  super("Picrypt - Securely Embed Files in Pictures");
 	  setDefaultCloseOperation(EXIT_ON_CLOSE);
 	  
-		Container container = getContentPane();
+		container = getContentPane();
 		container.setLayout(new GridBagLayout());
 		GridBagConstraints gridProps = null;
 		
 		setupMenu();
 				
-		gridProps = new GridBagConstraints();
+		setupNewKeyDlg();
+		
+		setVisible(true);
+  }
+  
+  public void setupMenu() {
+    JMenuBar menuBar = new JMenuBar();
+		
+		JMenu fileMenu = new JMenu("File");
+		menuBar.add(fileMenu);
+				
+		fileMenu.add(setupMenu("Extract File From Image"));	
+		fileMenu.add(setupMenu("Embed File In Image"));		
+		fileMenu.addSeparator();
+		fileMenu.add(setupMenu("Exit"));
+		
+		JMenu keyMenu = new JMenu("Manage Keys");
+		menuBar.add(keyMenu);
+		
+		keyMenu.add(setupMenu("Create New Contact"));	
+		keyMenu.add(setupMenu("Change Password"));	
+		keyMenu.add(setupMenu("Import Contact Info"));	
+		keyMenu.add(setupMenu("Export Contact Info"));	
+		
+		setJMenuBar(menuBar);
+  }
+  
+  public void setupNewKeyDlg() {
+    this.setSize(510, 550);
+  
+    GridBagConstraints gridProps = null;
+  
+    gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
 		gridProps.gridy = 0;
 		gridProps.anchor = GridBagConstraints.LINE_END;
@@ -77,37 +111,12 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridy = 5;
 		gridProps.gridwidth = 2;
 		gridProps.fill = GridBagConstraints.BOTH;
+		gridProps.gridheight = GridBagConstraints.REMAINDER;
 		pubKey = new JTextArea();
-		pubKey.setRows(5);
 		pubKey.setLineWrap(true);
     pubKey.setWrapStyleWord(false);
 		container.add(pubKey, gridProps);
-		
-		this.setSize(800, 800);
-		setVisible(true);
-  }
-  
-  public void setupMenu() {
-    JMenuBar menuBar = new JMenuBar();
-		
-		JMenu fileMenu = new JMenu("File");
-		menuBar.add(fileMenu);
-				
-		fileMenu.add(setupMenu("Extract File From Image"));	
-		fileMenu.add(setupMenu("Embed File In Image"));		
-		fileMenu.addSeparator();
-		fileMenu.add(setupMenu("Exit"));
-		
-		JMenu keyMenu = new JMenu("Manage Keys");
-		menuBar.add(keyMenu);
-		
-		keyMenu.add(setupMenu("Create New Contact"));	
-		keyMenu.add(setupMenu("Change Password"));	
-		keyMenu.add(setupMenu("Import Contact Info"));	
-		keyMenu.add(setupMenu("Export Contact Info"));	
-		
-		setJMenuBar(menuBar);
-  }
+	}
 	
 	public void actionPerformed(ActionEvent e) {
     if ("Run Tests".equals(e.getActionCommand())) {
@@ -151,6 +160,8 @@ class Picrypt extends JFrame implements ActionListener {
         
         byte[] toFile = PicryptLib.catArrays(aesPriv, rawPub);
         PicryptLib.saveFile(name.getText().replace(' ', '_').toLowerCase() + ".key", toFile);
+        
+        this.setSize(526, 370);
       }
       else {
         JOptionPane.showMessageDialog(this, "Passwords don't match");
