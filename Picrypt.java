@@ -25,9 +25,8 @@ class Picrypt extends JFrame implements ActionListener {
 		GridBagConstraints gridProps = null;
 		
 		setupMenu();
-				
-		setupNewKeyDlg();
 		
+		this.setSize(510, 370);
 		setVisible(true);
   }
   
@@ -54,7 +53,7 @@ class Picrypt extends JFrame implements ActionListener {
   }
   
   public void setupNewKeyDlg() {
-    this.setSize(510, 550);
+    this.setSize(510, 370);
   
     GridBagConstraints gridProps = null;
   
@@ -104,18 +103,28 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridx = 0;
 		gridProps.gridy = 4;
 		gridProps.gridwidth = 2;
-		container.add(new JLabel("<html><div align='center'><strong>Picrypt contact information</strong><br/><br/>(Allows people to send you files hidden in images)</div></html>"), gridProps);
+		container.add(new JLabel("Picrypt contact information"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
 		gridProps.gridy = 5;
 		gridProps.gridwidth = 2;
 		gridProps.fill = GridBagConstraints.BOTH;
-		gridProps.gridheight = GridBagConstraints.REMAINDER;
+		gridProps.weighty = 1;
 		pubKey = new JTextArea();
 		pubKey.setLineWrap(true);
     pubKey.setWrapStyleWord(false);
+    pubKey.setEditable(false);
+    pubKey.setText("\n\n\n\n\n\n\n\n\n\n\n\n");
 		container.add(pubKey, gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 6;
+		gridProps.gridwidth = 2;
+		container.add(new JLabel("Give your contact info to anyone you want to get Picrypt files from"), gridProps);
+		
+		setVisible(true);
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -129,7 +138,7 @@ class Picrypt extends JFrame implements ActionListener {
       JOptionPane.showMessageDialog(this, "Embed File In Image");
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Create New Contact");
+      setupNewKeyDlg();
     }
     else if ("Change Password".equals(e.getActionCommand())) {
       JOptionPane.showMessageDialog(this, "Change Password");
@@ -144,24 +153,7 @@ class Picrypt extends JFrame implements ActionListener {
       String pwd1 = new String(newPassword1.getPassword());
       String pwd2 = new String(newPassword2.getPassword());
       if (pwd1.equals(pwd2)) {
-        RSA rsa = new RSA();
-        rsa.generateKeyPair();
-        
-        byte[] rawPub = PicryptLib.catArrays(rsa.getPubKey().getEncoded(), name.getText().getBytes());
-        
-        byte[] aesKey = AES.passwordToKey(pwd1);
-        AES aes = new AES();
-        aes.setKey(aesKey);
-        byte[] rawPriv = aes.encrypt(rsa.getPrivKey().getEncoded());
-        byte[] iv = aes.getIv(); 
-        byte[] aesPriv = PicryptLib.catArrays(iv, rawPriv);
-        
-        pubKey.setText(Base64.encodeBytes(rawPub));
-        
-        byte[] toFile = PicryptLib.catArrays(aesPriv, rawPub);
-        PicryptLib.saveFile(name.getText().replace(' ', '_').toLowerCase() + ".key", toFile);
-        
-        this.setSize(526, 370);
+        createKey(pwd1);
       }
       else {
         JOptionPane.showMessageDialog(this, "Passwords don't match");
@@ -174,6 +166,25 @@ class Picrypt extends JFrame implements ActionListener {
       JOptionPane.showMessageDialog(this, "Unhandled action: " + e.getActionCommand());
     }
   } 
+  
+  public void createKey(String password) {
+    RSA rsa = new RSA();
+    rsa.generateKeyPair();
+    
+    byte[] rawPub = PicryptLib.catArrays(rsa.getPubKey().getEncoded(), name.getText().getBytes());
+    
+    byte[] aesKey = AES.passwordToKey(password);
+    AES aes = new AES();
+    aes.setKey(aesKey);
+    byte[] rawPriv = aes.encrypt(rsa.getPrivKey().getEncoded());
+    byte[] iv = aes.getIv(); 
+    byte[] aesPriv = PicryptLib.catArrays(iv, rawPriv);
+    
+    pubKey.setText(Base64.encodeBytes(rawPub));
+    
+    byte[] toFile = PicryptLib.catArrays(aesPriv, rawPub);
+    PicryptLib.saveFile(name.getText().replace(' ', '_').toLowerCase() + ".key", toFile);
+  }
   
   public JMenuItem setupMenu(String menuText) {
 		JMenuItem menuItem = new JMenuItem(menuText);
