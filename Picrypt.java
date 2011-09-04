@@ -8,8 +8,7 @@ import picrypt.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-class Picrypt extends JFrame implements ActionListener {	
-  public static final String KEY_STORE = "keys/";
+class Picrypt extends JFrame implements ActionListener {
 
   private Container container = null;
 
@@ -17,6 +16,16 @@ class Picrypt extends JFrame implements ActionListener {
   private JPasswordField newPassword1 = null;
   private JPasswordField newPassword2 = null;
   private JTextArea pubKey = null;
+  
+  private JComboBox keyNames = null;
+  
+  private JLabel toHideName = null;
+  private JLabel imgHideName = null;
+  private JLabel imgSaveName = null;
+  
+  private File fileToHide = null;
+  private File imgToHideIn = null;
+  private File imgToSave = null;
 
   public Picrypt() {
 	  super("Picrypt - Securely Embed Files in Pictures");
@@ -24,9 +33,10 @@ class Picrypt extends JFrame implements ActionListener {
 	  
 		container = getContentPane();
 		container.setLayout(new GridBagLayout());
-		GridBagConstraints gridProps = null;
 		
 		setupMenu();
+		
+		setupEmbedImageDlg();
 		
 		this.setResizable(false);
 		this.setSize(510, 370);
@@ -40,7 +50,7 @@ class Picrypt extends JFrame implements ActionListener {
 		menuBar.add(fileMenu);
 				
 		fileMenu.add(setupMenu("Extract File From Image"));	
-		fileMenu.add(setupMenu("Embed File In Image"));		
+		fileMenu.add(setupMenu("Hide File In Image"));		
 		fileMenu.addSeparator();
 		fileMenu.add(setupMenu("Exit"));
 		
@@ -52,10 +62,16 @@ class Picrypt extends JFrame implements ActionListener {
 		keyMenu.add(setupMenu("Import Contact Info"));	
 		keyMenu.add(setupMenu("Export Contact Info"));	
 		
+		JMenu debugMenu = new JMenu("Debug");
+		menuBar.add(debugMenu);
+		debugMenu.add(setupMenu("Run Tests"));	
+		
 		setJMenuBar(menuBar);
   }
   
   public void setupEmbedImageDlg() {
+    container.removeAll();
+    container.repaint();
     this.setSize(510, 370);
   
     GridBagConstraints gridProps = null;
@@ -65,11 +81,79 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridy = 0;
 		gridProps.anchor = GridBagConstraints.LINE_END;
 		container.add(new JLabel("Encrypt to:"), gridProps);
+
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 0;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+    container.add(setupKeyNameDropDown(), gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 1;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(setupButton("Select file to hide"), gridProps);
 		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 1;
+		gridProps.anchor = GridBagConstraints.LINE_START;
+		toHideName = new JLabel("[No File]");
+		container.add(toHideName, gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 3;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(setupButton("Select image to hide in"), gridProps);
 		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 3;
+		gridProps.anchor = GridBagConstraints.LINE_START;
+		imgHideName = new JLabel("[No File]");
+		container.add(imgHideName, gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 4;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(setupButton("Save as"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 4;
+		gridProps.anchor = GridBagConstraints.LINE_START;;
+		imgSaveName = new JLabel("[No File]");
+		container.add(imgSaveName, gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 5;
+		gridProps.gridwidth = 2;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		container.add(setupButton("Hide File"), gridProps);
+		
+		setVisible(true);
+  }
+  
+  public JComboBox setupKeyNameDropDown() {
+    String[] keys = (new File(PicryptLib.KEY_STORE)).list();
+		for (int i=0; i<keys.length; i++) { 
+		  keys[i] = keys[i].substring(0, keys[i].length() - 4).replace('_', ' ');
+		}
+		java.util.Arrays.sort(keys, String.CASE_INSENSITIVE_ORDER);
+		keyNames = new JComboBox(keys);
+		
+		return keyNames;
   }
   
   public void setupNewKeyDlg() {
+    container.removeAll();
+    container.repaint();
     this.setSize(510, 370);
   
     GridBagConstraints gridProps = null;
@@ -151,8 +235,54 @@ class Picrypt extends JFrame implements ActionListener {
     else if ("Extract File From Image".equals(e.getActionCommand())) {
       JOptionPane.showMessageDialog(this, "Extract File From Image");
     }
-    else if ("Embed File In Image".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Embed File In Image");
+    else if ("Hide File In Image".equals(e.getActionCommand())) {
+      setupEmbedImageDlg();
+    }
+    else if ("Select file to hide".equals(e.getActionCommand())) {
+      JFileChooser fc = new JFileChooser();
+      int returnVal = fc.showOpenDialog(this);
+      
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        fileToHide = fc.getSelectedFile();
+        toHideName.setText(fileToHide.getName());
+      }
+    }
+    else if ("Select image to hide in".equals(e.getActionCommand())) {
+      JFileChooser fc = new JFileChooser();
+      fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+      fc.addChoosableFileFilter(new ImgFilter());
+      int returnVal = fc.showOpenDialog(this);
+      
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        imgToHideIn = fc.getSelectedFile();
+        imgHideName.setText(imgToHideIn.getName());
+      }
+    }
+    else if ("Save as".equals(e.getActionCommand())) {
+      JFileChooser fc = new JFileChooser();
+      fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+      fc.addChoosableFileFilter(new ImgFilter());
+      int returnVal = fc.showSaveDialog(this);
+      
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        imgToSave = fc.getSelectedFile();
+        imgSaveName.setText(imgToSave.getName());
+      }
+    }
+    else if ("Hide File".equals(e.getActionCommand())) {
+      if (fileToHide == null) {
+        JOptionPane.showMessageDialog(this, "You must select a file to hide");
+      }
+      else if (imgToHideIn == null) {
+        JOptionPane.showMessageDialog(this, "You must select an image to hide in");
+      }
+      else if (imgToSave == null) {
+        JOptionPane.showMessageDialog(this, "You must select where to save the new image");
+      }
+      else {
+        PublicKey publicKey = PicryptLib.getPubKey(PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
+        PicryptLib.embedFile(publicKey, fileToHide.getPath(), imgToHideIn.getPath(), imgToSave.getPath());
+      }
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
       setupNewKeyDlg();
@@ -170,7 +300,7 @@ class Picrypt extends JFrame implements ActionListener {
       String pwd1 = new String(newPassword1.getPassword());
       String pwd2 = new String(newPassword2.getPassword());
       if (pwd1.equals(pwd2)) {
-        createKey(pwd1);
+        createKey(name.getText(), pwd1);
       }
       else {
         JOptionPane.showMessageDialog(this, "Passwords don't match");
@@ -184,24 +314,15 @@ class Picrypt extends JFrame implements ActionListener {
     }
   } 
   
-  public void createKey(String password) {
+  public void createKey(String name, String password) {
     RSA rsa = new RSA();
     rsa.generateKeyPair();
     
-    byte[] rawPub = PicryptLib.catArrays(rsa.getPubKey().getEncoded(), name.getText().getBytes());
-    
-    byte[] aesKey = AES.passwordToKey(password);
-    AES aes = new AES();
-    aes.setKey(aesKey);
-    byte[] rawPriv = aes.encrypt(rsa.getPrivKey().getEncoded());
-    byte[] iv = aes.getIv(); 
-    byte[] aesPriv = PicryptLib.catArrays(iv, rawPriv);
+    byte[] rawPub = PicryptLib.catArrays(rsa.getPubKey().getEncoded(), name.getBytes());
     
     pubKey.setText(Base64.encodeBytes(rawPub));
     
-    (new File(KEY_STORE)).mkdir();
-    byte[] toFile = PicryptLib.catArrays(aesPriv, rawPub);
-    PicryptLib.saveFile(KEY_STORE + name.getText().replace(' ', '_') + ".key", toFile);
+    PicryptLib.saveKey(password, rsa.getPubKey(), rsa.getPrivKey(), PicryptLib.KEY_STORE + name.replace(' ', '_') + ".key");
   }
   
   public JMenuItem setupMenu(String menuText) {
@@ -222,12 +343,13 @@ class Picrypt extends JFrame implements ActionListener {
     RSA rsa = new RSA();
     rsa.generateKeyPair();
     
-    PicryptLib.embedPubKey(rsa.getPubKey(), "sample.jpg", "output.pubKey.png");
-    PicryptLib.embedKey("password", rsa.getPubKey(), rsa.getPrivKey(), "sample.jpg", "output.key.png");
+    PicryptLib.saveKey("password", rsa.getPubKey(), rsa.getPrivKey(), PicryptLib.KEY_STORE + "test.key");
     
-    PicryptLib.embedFile(PicryptLib.extractPubKey("output.pubKey.png"), "~/java/picrypt/sample.doc", "sample.jpg", "output.png");     
+    PicryptLib.getPubKey(PicryptLib.KEY_STORE + "test.key");
     
-    PrivateKey privKey = PicryptLib.extractPrivKey("password", "output.key.png");
+    PicryptLib.embedFile(PicryptLib.getPubKey(PicryptLib.KEY_STORE + "test.key"), "sample.doc", "sample.jpg", "output.png");     
+    
+    PrivateKey privKey = PicryptLib.getPrivKey("password", PicryptLib.KEY_STORE + "test.key");
     String suggestedFileName = PicryptLib.getSuggestedFileName(privKey, "output.png");
     PicryptLib.extractFile(privKey, "output.png", suggestedFileName);
   }

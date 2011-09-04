@@ -9,7 +9,9 @@ import java.security.KeyFactory;
 import java.security.spec.X509EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 
-public abstract class PicryptLib {	  
+public abstract class PicryptLib {	  	
+  public static final String KEY_STORE = "keys/";
+  
   public static final int PUB_KEY_SIZE = 550;
   public static final int PRIV_KEY_SIZE = 2384;
 
@@ -72,58 +74,44 @@ public abstract class PicryptLib {
     return suggestedName;
   }
   
-  public static void embedPubKey(PublicKey pubKey, String imgInPath, String imgOutPath) {  
-    StegImg stegimgout = new StegImg(imgInPath);
+  public static  PublicKey getPubKey(String path) {
+    byte[] keyAsBytes = getFileAsBytes(path);
+    byte[] pubKeyAsBytes = sliceArray(keyAsBytes, 0, PUB_KEY_SIZE);
     
-    byte[] data = pubKey.getEncoded();
-    
-    stegimgout.embedBytes(data, 0, data.length);
-    stegimgout.saveImg(imgOutPath);
-  }
-  
-  public static PublicKey extractPubKey(String imgPath) {
     try {
-      StegImg stegimgin = new StegImg(imgPath);
-
-      byte[] data = stegimgin.extractBytes(0, PUB_KEY_SIZE); 
-      
       KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		  X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(data);
+		  X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubKeyAsBytes);
           
 		  return keyFactory.generatePublic(pubSpec);
 		}
 		catch (Exception e) { e.printStackTrace(); }
 		
-		return null;
+    return null;
   }
   
-  public static void embedKey(String password, PublicKey pubKey, PrivateKey privKey, String imgInPath, String imgOutPath) {  
+  public static void saveKey(String password, PublicKey pubKey, PrivateKey privKey, String outFile) {
     byte[] aesKey = AES.passwordToKey(password);
-    StegImg stegimgout = new StegImg(imgInPath);
     
-    byte[] data = pubKey.getEncoded();
-    
-    stegimgout.embedBytes(data, 0, data.length);
-    
-    data = privKey.getEncoded();
+    byte[] rawPrivKey = privKey.getEncoded();
         
     AES aes = new AES();
     aes.setKey(aesKey);
-    data = aes.encrypt(data);
+    rawPrivKey = aes.encrypt(rawPrivKey);
     byte[] iv = aes.getIv();
+    byte[] aesPriv = catArrays(aes.getIv(), rawPrivKey);
     
-    stegimgout.embedBytes(iv, byteCountToPixelCount(PUB_KEY_SIZE), iv.length);
-    stegimgout.embedBytes(data, byteCountToPixelCount(PUB_KEY_SIZE + AES.IV_LENGTH ), data.length);
-    stegimgout.saveImg(imgOutPath);
+    (new File(KEY_STORE)).mkdir();
+    byte[] toFile = catArrays(pubKey.getEncoded(), aesPriv);
+    saveFile(outFile, toFile);
   }
   
-  public static PrivateKey extractPrivKey(String password, String imgPath) {
+  public static PrivateKey getPrivKey(String password, String path) {
     try {
       byte[] aesKey = AES.passwordToKey(password);
-      StegImg stegimgin = new StegImg(imgPath);
+      byte[] keyAsBytes = getFileAsBytes(path);
 
-      byte[] iv = stegimgin.extractBytes(byteCountToPixelCount(PUB_KEY_SIZE), AES.IV_LENGTH);
-      byte[] data = stegimgin.extractBytes(byteCountToPixelCount(PUB_KEY_SIZE + AES.IV_LENGTH), PRIV_KEY_SIZE); 
+      byte[] iv = sliceArray(keyAsBytes, PUB_KEY_SIZE, PUB_KEY_SIZE + AES.IV_LENGTH);
+      byte[] data = sliceArray(keyAsBytes, PUB_KEY_SIZE + AES.IV_LENGTH, PUB_KEY_SIZE + AES.IV_LENGTH + PRIV_KEY_SIZE); 
       
       AES aes = new AES();
       aes.setKey(aesKey);
@@ -144,7 +132,7 @@ public abstract class PicryptLib {
     FileInputStream inputfile = null;
     
     try {
-      inputfile = new FileInputStream("sample.doc");
+      inputfile = new FileInputStream(path);
       int length = inputfile.available();
       byte[] data = new byte[length];
       inputfile.read(data, 0, length);
