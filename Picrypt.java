@@ -19,6 +19,8 @@ class Picrypt extends JFrame implements ActionListener {
   
   private JComboBox keyNames = null;
   
+  private JButton saveAsButton = null;
+  
   private JTextField toHideName = null;
   private JTextField imgHideName = null;
   private JTextField imgSaveName = null;
@@ -123,7 +125,9 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridy = 3;
 		gridProps.fill = GridBagConstraints.HORIZONTAL;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(setupButton("Save as"), gridProps);
+		saveAsButton = setupButton("Save as");
+		container.add(saveAsButton, gridProps);
+		saveAsButton.setEnabled(false);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
@@ -325,6 +329,7 @@ class Picrypt extends JFrame implements ActionListener {
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         fileToHide = fc.getSelectedFile();
+        
         toHideName.setText(fileToHide.getName());
       }
     }
@@ -343,6 +348,19 @@ class Picrypt extends JFrame implements ActionListener {
       JFileChooser fc = new JFileChooser();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
       fc.addChoosableFileFilter(new ImgFilter());
+      fc.setSelectedFile(new File("picrypt.png"));
+      int returnVal = fc.showSaveDialog(this);
+      
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        imgToSave = fc.getSelectedFile();
+        imgSaveName.setText(imgToSave.getName());
+      }
+    }
+    else if ("Save file as".equals(e.getActionCommand())) {
+      JFileChooser fc = new JFileChooser();
+      fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+      fc.addChoosableFileFilter(new ImgFilter());
+      fc.setSelectedFile(new File("picrypt.png"));
       int returnVal = fc.showSaveDialog(this);
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -364,6 +382,29 @@ class Picrypt extends JFrame implements ActionListener {
         PublicKey publicKey = PicryptLib.getPubKey(PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
         PicryptLib.embedFile(publicKey, fileToHide.getPath(), imgToHideIn.getPath(), imgToSave.getPath());
       }
+    }
+    else if ("Image to decrypt".equals(e.getActionCommand())) {
+      JFileChooser fc = new JFileChooser();
+      fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+      fc.addChoosableFileFilter(new ImgFilter());
+      int returnVal = fc.showOpenDialog(this);
+      
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        imgToHideIn = fc.getSelectedFile();
+        if (newPassword1.getText().length() > 0) {
+          PrivateKey privateKey = PicryptLib.getPrivKey(newPassword1.getText(), PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
+          fileToSave = new File(PicryptLib.getSuggestedFileName(privateKey, imgToHideIn.getPath()));
+          imgHideName.setText(imgToHideIn.getName());
+          fileSaveName.setText(fileToSave.getName());
+          saveAsButton.setEnabled(true);
+        }
+      }      
+    }
+    else if ("Extract File".equals(e.getActionCommand())) {
+      if (newPassword1.getText().length() > 0) {
+        PrivateKey privateKey = PicryptLib.getPrivKey(newPassword1.getText(), PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
+        PicryptLib.extractFile(privateKey, imgToHideIn.getPath(), fileToSave.getPath());
+      } 
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
       setupNewKeyDlg();

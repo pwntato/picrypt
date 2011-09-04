@@ -70,7 +70,7 @@ public abstract class PicryptLib {
   public static String getSuggestedFileName(PrivateKey privKey, String imgPath) {
     byte[] header = getHeader(privKey, imgPath);
     String suggestedName = new String(sliceArray(header, AES.KEY_LENGTH + AES.IV_LENGTH + 4, header.length));
-    suggestedName = "output." + suggestedName;
+    suggestedName = "picrypt." + suggestedName;
     return suggestedName;
   }
   
