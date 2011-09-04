@@ -19,13 +19,15 @@ class Picrypt extends JFrame implements ActionListener {
   
   private JComboBox keyNames = null;
   
-  private JLabel toHideName = null;
-  private JLabel imgHideName = null;
-  private JLabel imgSaveName = null;
+  private JTextField toHideName = null;
+  private JTextField imgHideName = null;
+  private JTextField imgSaveName = null;
+  private JTextField fileSaveName = null;
   
   private File fileToHide = null;
   private File imgToHideIn = null;
   private File imgToSave = null;
+  private File fileToSave = null;
 
   public Picrypt() {
 	  super("Picrypt - Securely Embed Files in Pictures");
@@ -36,7 +38,7 @@ class Picrypt extends JFrame implements ActionListener {
 		
 		setupMenu();
 		
-		setupEmbedImageDlg();
+		setupExtractImageDlg();
 		
 		this.setResizable(false);
 		this.setSize(510, 370);
@@ -69,6 +71,79 @@ class Picrypt extends JFrame implements ActionListener {
 		setJMenuBar(menuBar);
   }
   
+  public void setupExtractImageDlg() {
+    container.removeAll();
+    container.repaint();
+    this.setSize(510, 370);
+  
+    GridBagConstraints gridProps = null;
+  
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 0;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Decrypt as:"), gridProps);
+
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 0;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+    container.add(setupKeyNameDropDown(), gridProps);    
+  
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 1;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Password:"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 1;
+		newPassword1 = new JPasswordField(30);
+		container.add(newPassword1, gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 2;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(setupButton("Image to decrypt"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 2;
+		gridProps.anchor = GridBagConstraints.LINE_START;
+		imgHideName = new JTextField(30);
+		imgHideName.setText("[No File]");
+		imgHideName.setEditable(false);
+		container.add(imgHideName, gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 3;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(setupButton("Save as"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 3;
+		gridProps.anchor = GridBagConstraints.LINE_START;;
+		fileSaveName = new JTextField(30);
+		fileSaveName.setText("[No File]");
+		fileSaveName.setEditable(false);
+		container.add(fileSaveName, gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 4;
+		gridProps.gridwidth = 2;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		container.add(setupButton("Extract File"), gridProps);
+		
+		setVisible(true);
+  }
+  
   public void setupEmbedImageDlg() {
     container.removeAll();
     container.repaint();
@@ -93,13 +168,15 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridy = 1;
 		gridProps.fill = GridBagConstraints.HORIZONTAL;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(setupButton("Select file to hide"), gridProps);
+		container.add(setupButton("File to hide"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
 		gridProps.gridy = 1;
 		gridProps.anchor = GridBagConstraints.LINE_START;
-		toHideName = new JLabel("[No File]");
+		toHideName = new JTextField(30);
+		toHideName.setText("[No File]");
+		toHideName.setEditable(false);
 		container.add(toHideName, gridProps);
     
     gridProps = new GridBagConstraints();
@@ -107,13 +184,15 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridy = 3;
 		gridProps.fill = GridBagConstraints.HORIZONTAL;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(setupButton("Select image to hide in"), gridProps);
+		container.add(setupButton("Image to hide in"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
 		gridProps.gridy = 3;
 		gridProps.anchor = GridBagConstraints.LINE_START;
-		imgHideName = new JLabel("[No File]");
+		imgHideName = new JTextField(30);
+		imgHideName.setText("[No File]");
+		imgHideName.setEditable(false);
 		container.add(imgHideName, gridProps);
 		
 		gridProps = new GridBagConstraints();
@@ -127,7 +206,9 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridx = 1;
 		gridProps.gridy = 4;
 		gridProps.anchor = GridBagConstraints.LINE_START;;
-		imgSaveName = new JLabel("[No File]");
+		imgSaveName = new JTextField(30);
+		imgSaveName.setText("[No File]");
+		imgSaveName.setEditable(false);
 		container.add(imgSaveName, gridProps);
     
     gridProps = new GridBagConstraints();
@@ -233,12 +314,12 @@ class Picrypt extends JFrame implements ActionListener {
       runTests();   // don't do this is the ui thread
     }
     else if ("Extract File From Image".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Extract File From Image");
+      setupExtractImageDlg();
     }
     else if ("Hide File In Image".equals(e.getActionCommand())) {
       setupEmbedImageDlg();
     }
-    else if ("Select file to hide".equals(e.getActionCommand())) {
+    else if ("File to hide".equals(e.getActionCommand())) {
       JFileChooser fc = new JFileChooser();
       int returnVal = fc.showOpenDialog(this);
       
@@ -247,7 +328,7 @@ class Picrypt extends JFrame implements ActionListener {
         toHideName.setText(fileToHide.getName());
       }
     }
-    else if ("Select image to hide in".equals(e.getActionCommand())) {
+    else if ("Image to hide in".equals(e.getActionCommand())) {
       JFileChooser fc = new JFileChooser();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
       fc.addChoosableFileFilter(new ImgFilter());
