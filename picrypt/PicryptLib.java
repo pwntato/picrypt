@@ -89,7 +89,7 @@ public abstract class PicryptLib {
     return null;
   }
   
-  public static void saveKey(String password, PublicKey pubKey, PrivateKey privKey, String outFile) {
+  public static void saveKey(char[] password, PublicKey pubKey, PrivateKey privKey, String outFile) {
     byte[] aesKey = AES.passwordToKey(password);
     
     byte[] rawPrivKey = privKey.getEncoded();
@@ -105,7 +105,7 @@ public abstract class PicryptLib {
     saveFile(outFile, toFile);
   }
   
-  public static PrivateKey getPrivKey(String password, String path) {
+  public static PrivateKey getPrivKey(char[] password, String path) {
     try {
       byte[] aesKey = AES.passwordToKey(password);
       byte[] keyAsBytes = getFileAsBytes(path);

@@ -28,12 +28,21 @@ public class AES {
   
   public AES() {}
   
-  public static byte[] passwordToKey(String password) {
+  public static byte[] passwordToKey(char[] password) {
     try {
+      byte[] passwordAsBytes = new byte[password.length];
+      for (int i=0; i<password.length; i++) {
+        passwordAsBytes[i] = (byte) password[i];
+      }
+      
       MessageDigest hash = MessageDigest.getInstance(HASH_ALGO);
       
-      hash.update(password.getBytes(), 0, password.length());
+      hash.update(passwordAsBytes, 0, password.length);
       byte[] hash_password = hash.digest();
+      
+      for (int i=0; i<passwordAsBytes.length; i++) {
+        passwordAsBytes[i] = 0;
+      }
       
       return hash_password;
     } catch (NoSuchAlgorithmException e) { e.printStackTrace(); }

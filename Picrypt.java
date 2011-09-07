@@ -391,19 +391,29 @@ class Picrypt extends JFrame implements ActionListener {
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         imgToHideIn = fc.getSelectedFile();
-        if (newPassword1.getText().length() > 0) {
-          PrivateKey privateKey = PicryptLib.getPrivKey(newPassword1.getText(), PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
+        char[] password = newPassword1.getPassword();
+        if (password.length > 0) {
+          PrivateKey privateKey = PicryptLib.getPrivKey(password, PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
           fileToSave = new File(PicryptLib.getSuggestedFileName(privateKey, imgToHideIn.getPath()));
           imgHideName.setText(imgToHideIn.getName());
           fileSaveName.setText(fileToSave.getName());
           saveAsButton.setEnabled(true);
+          
+          for (int i=0; i<password.length; i++) {
+            password[i] = 0;
+          }
         }
       }      
     }
     else if ("Extract File".equals(e.getActionCommand())) {
-      if (newPassword1.getText().length() > 0) {
-        PrivateKey privateKey = PicryptLib.getPrivKey(newPassword1.getText(), PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
+      char[] password = newPassword1.getPassword();
+      if (password.length > 0) {
+        PrivateKey privateKey = PicryptLib.getPrivKey(password, PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
         PicryptLib.extractFile(privateKey, imgToHideIn.getPath(), fileToSave.getPath());
+        
+        for (int i=0; i<password.length; i++) {
+          password[i] = 0;
+        }
       } 
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
@@ -419,10 +429,15 @@ class Picrypt extends JFrame implements ActionListener {
       JOptionPane.showMessageDialog(this, "Export Contact Info");
     }
     else if ("Create Contact Info".equals(e.getActionCommand())) {
-      String pwd1 = new String(newPassword1.getPassword());
-      String pwd2 = new String(newPassword2.getPassword());
+      char[] pwd1 = newPassword1.getPassword();
+      char[] pwd2 = newPassword2.getPassword();
       if (pwd1.equals(pwd2)) {
         createKey(name.getText(), pwd1);
+              
+        for (int i=0; i<pwd1.length; i++) {
+          pwd1[i] = 0;
+          pwd2[i] = 0;
+        }
       }
       else {
         JOptionPane.showMessageDialog(this, "Passwords don't match");
@@ -436,7 +451,7 @@ class Picrypt extends JFrame implements ActionListener {
     }
   } 
   
-  public void createKey(String name, String password) {
+  public void createKey(String name, char[] password) {
     RSA rsa = new RSA();
     rsa.generateKeyPair();
     
@@ -465,13 +480,13 @@ class Picrypt extends JFrame implements ActionListener {
     RSA rsa = new RSA();
     rsa.generateKeyPair();
     
-    PicryptLib.saveKey("password", rsa.getPubKey(), rsa.getPrivKey(), PicryptLib.KEY_STORE + "test.key");
+    PicryptLib.saveKey("password".toCharArray(), rsa.getPubKey(), rsa.getPrivKey(), PicryptLib.KEY_STORE + "test.key");
     
     PicryptLib.getPubKey(PicryptLib.KEY_STORE + "test.key");
     
     PicryptLib.embedFile(PicryptLib.getPubKey(PicryptLib.KEY_STORE + "test.key"), "sample.doc", "sample.jpg", "output.png");     
     
-    PrivateKey privKey = PicryptLib.getPrivKey("password", PicryptLib.KEY_STORE + "test.key");
+    PrivateKey privKey = PicryptLib.getPrivKey("password".toCharArray(), PicryptLib.KEY_STORE + "test.key");
     String suggestedFileName = PicryptLib.getSuggestedFileName(privKey, "output.png");
     PicryptLib.extractFile(privKey, "output.png", suggestedFileName);
   }
