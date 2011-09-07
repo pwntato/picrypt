@@ -337,7 +337,7 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridx = 0;
 		gridProps.gridy = 1;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter current password:"), gridProps);
+		container.add(new JLabel("Enter password:"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
@@ -349,7 +349,7 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridx = 0;
 		gridProps.gridy = 2;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter password:"), gridProps);
+		container.add(new JLabel("Enter new password:"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
@@ -361,7 +361,7 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridx = 0;
 		gridProps.gridy = 3;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter password again:"), gridProps);
+		container.add(new JLabel("New password again:"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
@@ -465,9 +465,7 @@ class Picrypt extends JFrame implements ActionListener {
           fileSaveName.setText(fileToSave.getName());
           saveAsButton.setEnabled(true);
           
-          for (int i=0; i<password.length; i++) {
-            password[i] = 0;
-          }
+          clearMemory(password);
         }
       }      
     }
@@ -477,16 +475,39 @@ class Picrypt extends JFrame implements ActionListener {
         PrivateKey privateKey = PicryptLib.getPrivKey(password, PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
         PicryptLib.extractFile(privateKey, imgToHideIn.getPath(), fileToSave.getPath());
         
-        for (int i=0; i<password.length; i++) {
-          password[i] = 0;
-        }
+        clearMemory(password);
       } 
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
       setupNewKeyDlg();
     }
     else if ("Change Password".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Change Password");
+      changePasswordDlg();
+    }
+    else if ("Update password".equals(e.getActionCommand())) {
+      char[] curPwd = currentPassword.getPassword();
+      char[] pwd1 = newPassword1.getPassword();
+      char[] pwd2 = newPassword2.getPassword();
+      
+      if (charEquals(pwd1, pwd2)) {
+        String keyPath = PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key";
+        PublicKey publicKey = PicryptLib.getPubKey(keyPath);
+        
+        PrivateKey privateKey = PicryptLib.getPrivKey(curPwd, keyPath);
+        if (privateKey == null) {
+          JOptionPane.showMessageDialog(this, "Incorrect password");
+        }
+        else {        
+          PicryptLib.saveKey(pwd1, publicKey, privateKey, keyPath);
+        }
+      }
+      else {
+        JOptionPane.showMessageDialog(this, "Passwords don't match");
+      }
+      
+      clearMemory(curPwd);
+      clearMemory(pwd1);
+      clearMemory(pwd2);
     }
     else if ("Import Contact Info".equals(e.getActionCommand())) {
       JOptionPane.showMessageDialog(this, "Import Contact Info");
@@ -497,13 +518,11 @@ class Picrypt extends JFrame implements ActionListener {
     else if ("Create Contact Info".equals(e.getActionCommand())) {
       char[] pwd1 = newPassword1.getPassword();
       char[] pwd2 = newPassword2.getPassword();
-      if (pwd1.equals(pwd2)) {
+      if (charEquals(pwd1, pwd2)) {
         createKey(name.getText(), pwd1);
               
-        for (int i=0; i<pwd1.length; i++) {
-          pwd1[i] = 0;
-          pwd2[i] = 0;
-        }
+        clearMemory(pwd1);
+        clearMemory(pwd2);
       }
       else {
         JOptionPane.showMessageDialog(this, "Passwords don't match");
@@ -540,6 +559,26 @@ class Picrypt extends JFrame implements ActionListener {
 		button.setActionCommand(buttonText);
 		button.addActionListener(this);
 		return button;
+  }
+  
+  public boolean charEquals(char[] pwd1, char[] pwd2) {
+    if (pwd1.length != pwd2.length) {
+      return false;
+    }
+    
+    for (int i=0; i<pwd1.length; i++) {
+      if (pwd1[i] != pwd2[i]) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  public void clearMemory(char[] data) {
+    for (int i=0; i<data.length; i++) {
+      data[i] = 0;
+    }
   }
   
   public void runTests() {

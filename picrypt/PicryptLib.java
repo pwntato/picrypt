@@ -123,7 +123,7 @@ public abstract class PicryptLib {
           
 		  return keyFactory.generatePrivate(privSpec);
 		}
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) { System.out.println("Nothing to see here... Or maybe the wrong password."); }
 		
 		return null;
   }
