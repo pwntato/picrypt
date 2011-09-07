@@ -13,6 +13,7 @@ class Picrypt extends JFrame implements ActionListener {
   private Container container = null;
 
   private JTextField name = null;
+  private JPasswordField currentPassword = null;
   private JPasswordField newPassword1 = null;
   private JPasswordField newPassword2 = null;
   private JTextArea pubKey = null;
@@ -40,7 +41,7 @@ class Picrypt extends JFrame implements ActionListener {
 		
 		setupMenu();
 		
-		setupExtractImageDlg();
+		changePasswordDlg();
 		
 		this.setResizable(false);
 		this.setSize(510, 370);
@@ -309,6 +310,71 @@ class Picrypt extends JFrame implements ActionListener {
 		gridProps.gridy = 6;
 		gridProps.gridwidth = 2;
 		container.add(new JLabel("Give your contact info to anyone you want to get Picrypt files from"), gridProps);
+		
+		setVisible(true);
+	}
+	
+	public void changePasswordDlg() {
+    container.removeAll();
+    container.repaint();
+    this.setSize(510, 370);
+  
+    GridBagConstraints gridProps = null;
+  
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 0;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Encrypt to:"), gridProps);
+
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 0;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+    container.add(setupKeyNameDropDown(), gridProps);
+				
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 1;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Enter current password:"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 1;
+		currentPassword = new JPasswordField(30);
+		container.add(currentPassword, gridProps);
+				
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 2;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Enter password:"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 2;
+		newPassword1 = new JPasswordField(30);
+		container.add(newPassword1, gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 3;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Enter password again:"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 3;
+		newPassword2 = new JPasswordField(30);
+		container.add(newPassword2, gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 4;
+		gridProps.gridwidth = 2;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		container.add(setupButton("Update password"), gridProps);
 		
 		setVisible(true);
 	}
