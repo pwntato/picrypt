@@ -127,6 +127,13 @@ public abstract class PicryptLib {
 		
 		return null;
   }
+  public static String getRawPublicKeyB64(String path) {
+    return Base64.encodeBytes(sliceArray(getFileAsBytes(path), 0, PUB_KEY_SIZE));
+  }
+  
+  public static String getRawKeyB64(String path) {
+    return Base64.encodeBytes(getFileAsBytes(path));
+  }
   
   public static byte[] getFileAsBytes(String path) {
     FileInputStream inputfile = null;

@@ -19,6 +19,7 @@ class Picrypt extends JFrame implements ActionListener {
   private JTextArea pubKey = null;
   
   private JComboBox keyNames = null;
+  private JComboBox keyType = null;
   
   private JButton saveAsButton = null;
   
@@ -41,10 +42,10 @@ class Picrypt extends JFrame implements ActionListener {
 		
 		setupMenu();
 		
-		changePasswordDlg();
+		setupExportKey();
 		
 		this.setResizable(false);
-		this.setSize(510, 370);
+		//this.setSize(510, 370);
 		setVisible(true);
   }
   
@@ -235,6 +236,62 @@ class Picrypt extends JFrame implements ActionListener {
 		keyNames = new JComboBox(keys);
 		
 		return keyNames;
+  }
+  
+  public void setupExportKey() {
+    container.removeAll();
+    this.setSize(510, 370);
+    container.repaint();
+  
+    GridBagConstraints gridProps = null;
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 0;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Contact to export:"), gridProps);
+
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 0;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+    container.add(setupKeyNameDropDown(), gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 1;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Export type:"), gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 1;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		String[] types = {"Contact Info (Share with everyone)", "Secret Key (Encrypted, but keep it safe)"};
+    keyType = new JComboBox(types);
+    container.add(keyType, gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 2;
+		gridProps.gridwidth = 2;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		container.add(setupButton("Export"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 3;
+		gridProps.gridwidth = 2;
+		gridProps.fill = GridBagConstraints.BOTH;
+		gridProps.weighty = 1;
+		pubKey = new JTextArea();
+		pubKey.setLineWrap(true);
+    pubKey.setWrapStyleWord(false);
+    pubKey.setEditable(false);
+    pubKey.setText("\n\n\n\n\n\n\n\n\n\n\n\n");
+    container.add(new JScrollPane(pubKey), gridProps);
+		
+		setVisible(true);
   }
   
   public void setupNewKeyDlg() {
@@ -447,6 +504,8 @@ class Picrypt extends JFrame implements ActionListener {
       else {
         PublicKey publicKey = PicryptLib.getPubKey(PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
         PicryptLib.embedFile(publicKey, fileToHide.getPath(), imgToHideIn.getPath(), imgToSave.getPath());
+        
+        JOptionPane.showMessageDialog(this, "Done!");
       }
     }
     else if ("Image to decrypt".equals(e.getActionCommand())) {
@@ -476,6 +535,8 @@ class Picrypt extends JFrame implements ActionListener {
         PicryptLib.extractFile(privateKey, imgToHideIn.getPath(), fileToSave.getPath());
         
         clearMemory(password);
+        
+        JOptionPane.showMessageDialog(this, "Done!");
       } 
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
@@ -499,6 +560,7 @@ class Picrypt extends JFrame implements ActionListener {
         }
         else {        
           PicryptLib.saveKey(pwd1, publicKey, privateKey, keyPath);
+          JOptionPane.showMessageDialog(this, "Done!");
         }
       }
       else {
@@ -513,7 +575,7 @@ class Picrypt extends JFrame implements ActionListener {
       JOptionPane.showMessageDialog(this, "Import Contact Info");
     }
     else if ("Export Contact Info".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Export Contact Info");
+      setupExportKey();
     }
     else if ("Create Contact Info".equals(e.getActionCommand())) {
       char[] pwd1 = newPassword1.getPassword();
@@ -523,9 +585,21 @@ class Picrypt extends JFrame implements ActionListener {
               
         clearMemory(pwd1);
         clearMemory(pwd2);
+        
+        JOptionPane.showMessageDialog(this, "Done!");
       }
       else {
         JOptionPane.showMessageDialog(this, "Passwords don't match");
+      }
+    }
+    else if ("Export".equals(e.getActionCommand())) {
+      String keyPath = PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key";
+      
+      if (((String)keyType.getSelectedItem()).startsWith("Secret Key")) {
+        pubKey.setText(PicryptLib.getRawKeyB64(keyPath));
+      }
+      else {
+        pubKey.setText(PicryptLib.getRawPublicKeyB64(keyPath));
       }
     }
     else if ("Exit".equals(e.getActionCommand())) {
