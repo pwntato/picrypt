@@ -1,4 +1,7 @@
 import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.event.*;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -8,7 +11,7 @@ import picrypt.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-class Picrypt extends JFrame implements ActionListener {
+class Picrypt extends JFrame implements ActionListener, DocumentListener {
 
   private Container container = null;
 
@@ -42,7 +45,7 @@ class Picrypt extends JFrame implements ActionListener {
 		
 		setupMenu();
 		
-		setupExportKey();
+		setupImportKey();
 		
 		this.setResizable(false);
 		//this.setSize(510, 370);
@@ -236,6 +239,48 @@ class Picrypt extends JFrame implements ActionListener {
 		keyNames = new JComboBox(keys);
 		
 		return keyNames;
+  }
+  
+  public void setupImportKey() {
+    container.removeAll();
+    this.setSize(510, 370);
+    container.repaint();
+  
+    GridBagConstraints gridProps = null;
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 0;
+		gridProps.anchor = GridBagConstraints.LINE_END;
+		container.add(new JLabel("Contact name:"), gridProps);
+
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 0;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		name = new JTextField(30);
+    container.add(name, gridProps);
+    
+    gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 1;
+		gridProps.gridwidth = 2;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		container.add(setupButton("Save Contact"), gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 0;
+		gridProps.gridy = 2;
+		gridProps.gridwidth = 2;
+		gridProps.fill = GridBagConstraints.BOTH;
+		gridProps.weighty = 1;
+		pubKey = new JTextArea();
+		pubKey.setLineWrap(true);
+    pubKey.setWrapStyleWord(false);
+    pubKey.getDocument().addDocumentListener(this);
+    container.add(new JScrollPane(pubKey), gridProps);
+		
+		setVisible(true);
   }
   
   public void setupExportKey() {
@@ -572,7 +617,7 @@ class Picrypt extends JFrame implements ActionListener {
       clearMemory(pwd2);
     }
     else if ("Import Contact Info".equals(e.getActionCommand())) {
-      JOptionPane.showMessageDialog(this, "Import Contact Info");
+      setupImportKey();
     }
     else if ("Export Contact Info".equals(e.getActionCommand())) {
       setupExportKey();
@@ -593,13 +638,14 @@ class Picrypt extends JFrame implements ActionListener {
       }
     }
     else if ("Export".equals(e.getActionCommand())) {
-      String keyPath = PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key";
+      String keyName = ((String)keyNames.getSelectedItem()).replace(' ', '_');
+      String keyPath = PicryptLib.KEY_STORE + keyName + ".key";
       
       if (((String)keyType.getSelectedItem()).startsWith("Secret Key")) {
-        pubKey.setText(PicryptLib.getRawKeyB64(keyPath));
+        pubKey.setText(PicryptLib.getRawKeyB64(keyName, keyPath));
       }
       else {
-        pubKey.setText(PicryptLib.getRawPublicKeyB64(keyPath));
+        pubKey.setText(PicryptLib.getRawPublicKeyB64(keyName, keyPath));
       }
     }
     else if ("Exit".equals(e.getActionCommand())) {
@@ -609,6 +655,26 @@ class Picrypt extends JFrame implements ActionListener {
       JOptionPane.showMessageDialog(this, "Unhandled action: " + e.getActionCommand());
     }
   } 
+  
+  public void insertUpdate(DocumentEvent e) {
+    try {
+      byte[] key = Base64.decode(pubKey.getText());
+      int firstNameChar = 0;
+      if (key.length >= PicryptLib.PUB_KEY_SIZE + PicryptLib.PRIV_KEY_SIZE) {
+        firstNameChar = PicryptLib.PUB_KEY_SIZE + PicryptLib.PUB_KEY_SIZE;
+      }
+      else {
+        firstNameChar = PicryptLib.PUB_KEY_SIZE;
+      }
+      
+      //TODO: pre-populate first name here
+    }
+    catch (Exception ex) {}
+  }
+    
+  public void removeUpdate(DocumentEvent e) {}
+  
+  public void changedUpdate(DocumentEvent e) {}
   
   public void createKey(String name, char[] password) {
     RSA rsa = new RSA();

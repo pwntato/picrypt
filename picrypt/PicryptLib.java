@@ -127,12 +127,14 @@ public abstract class PicryptLib {
 		
 		return null;
   }
-  public static String getRawPublicKeyB64(String path) {
-    return Base64.encodeBytes(sliceArray(getFileAsBytes(path), 0, PUB_KEY_SIZE));
+  public static String getRawPublicKeyB64(String name, String path) {
+    byte[] key = catArrays(sliceArray(getFileAsBytes(path), 0, PUB_KEY_SIZE), name.getBytes());
+    return Base64.encodeBytes(key);
   }
   
-  public static String getRawKeyB64(String path) {
-    return Base64.encodeBytes(getFileAsBytes(path));
+  public static String getRawKeyB64(String name, String path) {
+    byte[] key = catArrays(getFileAsBytes(path), name.getBytes());
+    return Base64.encodeBytes(key);
   }
   
   public static byte[] getFileAsBytes(String path) {
