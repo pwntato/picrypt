@@ -22,7 +22,6 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
   private JTextArea pubKey = null;
   
   private JComboBox keyNames = null;
-  private JComboBox keyType = null;
   
   private JButton saveAsButton = null;
   
@@ -282,63 +281,7 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
 		
 		setVisible(true);
   }
-  
-  public void setupExportKey() {
-    container.removeAll();
-    this.setSize(510, 370);
-    container.repaint();
-  
-    GridBagConstraints gridProps = null;
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 0;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Contact to export:"), gridProps);
 
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 0;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-    container.add(setupKeyNameDropDown(), gridProps);
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 1;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Export type:"), gridProps);
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 1;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		String[] types = {"Contact Info (Share with everyone)", "Secret Key (Encrypted, but keep it safe)"};
-    keyType = new JComboBox(types);
-    container.add(keyType, gridProps);
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 2;
-		gridProps.gridwidth = 2;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		container.add(setupButton("Export"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 3;
-		gridProps.gridwidth = 2;
-		gridProps.fill = GridBagConstraints.BOTH;
-		gridProps.weighty = 1;
-		pubKey = new JTextArea();
-		pubKey.setLineWrap(true);
-    pubKey.setWrapStyleWord(false);
-    pubKey.setEditable(false);
-    pubKey.setText("\n\n\n\n\n\n\n\n\n\n\n\n");
-    container.add(new JScrollPane(pubKey), gridProps);
-		
-		setVisible(true);
-  }
-	
 	public void actionPerformed(ActionEvent e) {
     if ("Run Tests".equals(e.getActionCommand())) {
       runTests();   // don't do this is the ui thread
@@ -454,18 +397,8 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
       setupImportKey();
     }
     else if ("Export Contact Info".equals(e.getActionCommand())) {
-      setupExportKey();
-    }
-    else if ("Export".equals(e.getActionCommand())) {
-      String keyName = ((String)keyNames.getSelectedItem()).replace(' ', '_');
-      String keyPath = PicryptLib.KEY_STORE + keyName + ".key";
-      
-      if (((String)keyType.getSelectedItem()).startsWith("Secret Key")) {
-        pubKey.setText(PicryptLib.getRawKeyB64(keyName, keyPath));
-      }
-      else {
-        pubKey.setText(PicryptLib.getRawPublicKeyB64(keyName, keyPath));
-      }
+      ExportKey dlg = new ExportKey(this, container);
+      dlg.setupDlg();
     }
     else if ("Exit".equals(e.getActionCommand())) {
       System.exit(0);
