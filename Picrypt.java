@@ -11,7 +11,7 @@ import picrypt.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-class Picrypt extends JFrame implements ActionListener, DocumentListener {
+class Picrypt extends JFrame implements ActionListener {
 
   private Container container = null;
 
@@ -44,7 +44,8 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
 		
 		setupMenu();
 		
-		setupImportKey();
+		ImportKey dlg = new ImportKey(this, container);
+    dlg.setupDlg();
 		
 		this.setResizable(false);
 		//this.setSize(510, 370);
@@ -239,48 +240,6 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
 		
 		return keyNames;
   }
-  
-  public void setupImportKey() {
-    container.removeAll();
-    this.setSize(510, 370);
-    container.repaint();
-  
-    GridBagConstraints gridProps = null;
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 0;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Contact name:"), gridProps);
-
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 0;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		name = new JTextField(30);
-    container.add(name, gridProps);
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 1;
-		gridProps.gridwidth = 2;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		container.add(setupButton("Save Contact"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 2;
-		gridProps.gridwidth = 2;
-		gridProps.fill = GridBagConstraints.BOTH;
-		gridProps.weighty = 1;
-		pubKey = new JTextArea();
-		pubKey.setLineWrap(true);
-    pubKey.setWrapStyleWord(false);
-    pubKey.getDocument().addDocumentListener(this);
-    container.add(new JScrollPane(pubKey), gridProps);
-		
-		setVisible(true);
-  }
 
 	public void actionPerformed(ActionEvent e) {
     if ("Run Tests".equals(e.getActionCommand())) {
@@ -394,7 +353,8 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
       dlg.setupDlg();
     }
     else if ("Import Contact Info".equals(e.getActionCommand())) {
-      setupImportKey();
+      ImportKey dlg = new ImportKey(this, container);
+      dlg.setupDlg();
     }
     else if ("Export Contact Info".equals(e.getActionCommand())) {
       ExportKey dlg = new ExportKey(this, container);
@@ -407,28 +367,6 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
       JOptionPane.showMessageDialog(this, "Unhandled action: " + e.getActionCommand());
     }
   } 
-  
-  public void insertUpdate(DocumentEvent e) {
-    try {
-      byte[] key = Base64.decode(pubKey.getText());
-      int firstNameChar = 0;
-      if (key.length >= PicryptLib.PUB_KEY_SIZE + AES.IV_LENGTH + PicryptLib.PRIV_KEY_SIZE) {
-        firstNameChar = PicryptLib.PUB_KEY_SIZE + AES.IV_LENGTH + PicryptLib.PRIV_KEY_SIZE;
-      }
-      else {
-        firstNameChar = PicryptLib.PUB_KEY_SIZE;
-      }
-      
-      String suggestedName = new String(PicryptLib.sliceArray(key, firstNameChar, key.length));
-      suggestedName = suggestedName.replace('_', ' ');
-      name.setText(suggestedName);
-    }
-    catch (Exception ex) {}
-  }
-    
-  public void removeUpdate(DocumentEvent e) {}
-  
-  public void changedUpdate(DocumentEvent e) {}
   
   public JMenuItem setupMenu(String menuText) {
 		JMenuItem menuItem = new JMenuItem(menuText);
