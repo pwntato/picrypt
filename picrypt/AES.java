@@ -55,7 +55,7 @@ public class AES {
       Cipher c = Cipher.getInstance("AES/CBC/PKCS5PADDING");
       c.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
       return c.doFinal(data);
-    } catch (Exception e) { e.printStackTrace(); }
+    } catch (Exception e) {}
     
     return null;
   }

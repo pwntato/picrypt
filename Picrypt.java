@@ -338,148 +338,6 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
 		
 		setVisible(true);
   }
-  
-  public void setupNewKeyDlg() {
-    container.removeAll();
-    container.repaint();
-    this.setSize(510, 370);
-  
-    GridBagConstraints gridProps = null;
-  
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 0;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter name:"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 0;
-		name = new JTextField(30);
-		container.add(name, gridProps);
-				
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 1;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter password:"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 1;
-		newPassword1 = new JPasswordField(30);
-		container.add(newPassword1, gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 2;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter password again:"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 2;
-		newPassword2 = new JPasswordField(30);
-		container.add(newPassword2, gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 3;
-		gridProps.gridwidth = 2;
-		container.add(setupButton("Create Contact Info"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 4;
-		gridProps.gridwidth = 2;
-		container.add(new JLabel("Picrypt contact information"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 5;
-		gridProps.gridwidth = 2;
-		gridProps.fill = GridBagConstraints.BOTH;
-		gridProps.weighty = 1;
-		pubKey = new JTextArea();
-		pubKey.setLineWrap(true);
-    pubKey.setWrapStyleWord(false);
-    pubKey.setEditable(false);
-    pubKey.setText("\n\n\n\n\n\n\n\n\n\n\n\n");
-		container.add(pubKey, gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 6;
-		gridProps.gridwidth = 2;
-		container.add(new JLabel("Give your contact info to anyone you want to get Picrypt files from"), gridProps);
-		
-		setVisible(true);
-	}
-	
-	public void changePasswordDlg() {
-    container.removeAll();
-    container.repaint();
-    this.setSize(510, 370);
-  
-    GridBagConstraints gridProps = null;
-  
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 0;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Encrypt to:"), gridProps);
-
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 0;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-    container.add(setupKeyNameDropDown(), gridProps);
-				
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 1;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter password:"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 1;
-		currentPassword = new JPasswordField(30);
-		container.add(currentPassword, gridProps);
-				
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 2;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Enter new password:"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 2;
-		newPassword1 = new JPasswordField(30);
-		container.add(newPassword1, gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 3;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("New password again:"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 3;
-		newPassword2 = new JPasswordField(30);
-		container.add(newPassword2, gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 4;
-		gridProps.gridwidth = 2;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		container.add(setupButton("Update password"), gridProps);
-		
-		setVisible(true);
-	}
 	
 	public void actionPerformed(ActionEvent e) {
     if ("Run Tests".equals(e.getActionCommand())) {
@@ -585,57 +443,18 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
       } 
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
-      setupNewKeyDlg();
+      CreateKey dlg = new CreateKey(this, container);
+      dlg.setupDlg();
     }
-    else if ("Change Password".equals(e.getActionCommand())) {
-      changePasswordDlg();
-    }
-    else if ("Update password".equals(e.getActionCommand())) {
-      char[] curPwd = currentPassword.getPassword();
-      char[] pwd1 = newPassword1.getPassword();
-      char[] pwd2 = newPassword2.getPassword();
-      
-      if (charEquals(pwd1, pwd2)) {
-        String keyPath = PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key";
-        PublicKey publicKey = PicryptLib.getPubKey(keyPath);
-        
-        PrivateKey privateKey = PicryptLib.getPrivKey(curPwd, keyPath);
-        if (privateKey == null) {
-          JOptionPane.showMessageDialog(this, "Incorrect password");
-        }
-        else {        
-          PicryptLib.saveKey(pwd1, publicKey, privateKey, keyPath);
-          JOptionPane.showMessageDialog(this, "Done!");
-        }
-      }
-      else {
-        JOptionPane.showMessageDialog(this, "Passwords don't match");
-      }
-      
-      clearMemory(curPwd);
-      clearMemory(pwd1);
-      clearMemory(pwd2);
+    else if ("Change Password".equals(e.getActionCommand())) {  
+      ChangePassword dlg = new ChangePassword(this, container);
+      dlg.setupDlg();
     }
     else if ("Import Contact Info".equals(e.getActionCommand())) {
       setupImportKey();
     }
     else if ("Export Contact Info".equals(e.getActionCommand())) {
       setupExportKey();
-    }
-    else if ("Create Contact Info".equals(e.getActionCommand())) {
-      char[] pwd1 = newPassword1.getPassword();
-      char[] pwd2 = newPassword2.getPassword();
-      if (charEquals(pwd1, pwd2)) {
-        createKey(name.getText(), pwd1);
-              
-        clearMemory(pwd1);
-        clearMemory(pwd2);
-        
-        JOptionPane.showMessageDialog(this, "Done!");
-      }
-      else {
-        JOptionPane.showMessageDialog(this, "Passwords don't match");
-      }
     }
     else if ("Export".equals(e.getActionCommand())) {
       String keyName = ((String)keyNames.getSelectedItem()).replace(' ', '_');
@@ -678,17 +497,6 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
   
   public void changedUpdate(DocumentEvent e) {}
   
-  public void createKey(String name, char[] password) {
-    RSA rsa = new RSA();
-    rsa.generateKeyPair();
-    
-    byte[] rawPub = PicryptLib.catArrays(rsa.getPubKey().getEncoded(), name.getBytes());
-    
-    pubKey.setText(Base64.encodeBytes(rawPub));
-    
-    PicryptLib.saveKey(password, rsa.getPubKey(), rsa.getPrivKey(), PicryptLib.KEY_STORE + name.replace(' ', '_') + ".key");
-  }
-  
   public JMenuItem setupMenu(String menuText) {
 		JMenuItem menuItem = new JMenuItem(menuText);
 		menuItem.setActionCommand(menuText);
@@ -697,9 +505,13 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
   }
   
   public JButton setupButton(String buttonText) {
+		return setupButton(this, buttonText);
+  }
+  
+  public static JButton setupButton(ActionListener frame, String buttonText) {
 		JButton button = new JButton(buttonText);
 		button.setActionCommand(buttonText);
-		button.addActionListener(this);
+		button.addActionListener(frame);
 		return button;
   }
   
