@@ -660,14 +660,16 @@ class Picrypt extends JFrame implements ActionListener, DocumentListener {
     try {
       byte[] key = Base64.decode(pubKey.getText());
       int firstNameChar = 0;
-      if (key.length >= PicryptLib.PUB_KEY_SIZE + PicryptLib.PRIV_KEY_SIZE) {
-        firstNameChar = PicryptLib.PUB_KEY_SIZE + PicryptLib.PUB_KEY_SIZE;
+      if (key.length >= PicryptLib.PUB_KEY_SIZE + AES.IV_LENGTH + PicryptLib.PRIV_KEY_SIZE) {
+        firstNameChar = PicryptLib.PUB_KEY_SIZE + AES.IV_LENGTH + PicryptLib.PRIV_KEY_SIZE;
       }
       else {
         firstNameChar = PicryptLib.PUB_KEY_SIZE;
       }
       
-      //TODO: pre-populate first name here
+      String suggestedName = new String(PicryptLib.sliceArray(key, firstNameChar, key.length));
+      suggestedName = suggestedName.replace('_', ' ');
+      name.setText(suggestedName);
     }
     catch (Exception ex) {}
   }
