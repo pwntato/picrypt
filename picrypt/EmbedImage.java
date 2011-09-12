@@ -126,7 +126,7 @@ public class EmbedImage implements ActionListener {
     else if ("Image to hide in".equals(e.getActionCommand())) {
       JFileChooser fc = new JFileChooser();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-      fc.addChoosableFileFilter(new ImgFilter());
+      fc.addChoosableFileFilter(new ImgFilter(false));
       int returnVal = fc.showOpenDialog(frame);
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -137,7 +137,7 @@ public class EmbedImage implements ActionListener {
     else if ("Save as".equals(e.getActionCommand())) {
       JFileChooser fc = new JFileChooser();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-      fc.addChoosableFileFilter(new ImgFilter());
+      fc.addChoosableFileFilter(new ImgFilter(true));
       fc.setSelectedFile(new File("picrypt.png"));
       int returnVal = fc.showSaveDialog(frame);
       

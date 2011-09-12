@@ -113,7 +113,7 @@ public class ExtractImage implements ActionListener {
     if ("Image to decrypt".equals(e.getActionCommand())) {
       JFileChooser fc = new JFileChooser();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-      fc.addChoosableFileFilter(new ImgFilter());
+      fc.addChoosableFileFilter(new ImgFilter(true));
       int returnVal = fc.showOpenDialog(frame);
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {
