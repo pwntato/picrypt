@@ -68,6 +68,17 @@ public class ImportKey implements ActionListener, DocumentListener {
   }
   
   public void actionPerformed(ActionEvent e) {
+    if ("Save Contact".equals(e.getActionCommand())) {
+      try {
+        byte[] key = Base64.decode(pubKey.getText());
+        String fileName = PicryptLib.KEY_STORE + name.getText().replace(' ', '_') + ".key";
+        
+        PicryptLib.saveFile(fileName, key);
+        
+        JOptionPane.showMessageDialog(frame, "Done!");
+      }
+      catch (Exception ex) {}
+    }
   }
   
   public void insertUpdate(DocumentEvent e) {
