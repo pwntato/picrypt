@@ -78,81 +78,6 @@ class Picrypt extends JFrame implements ActionListener {
 		setJMenuBar(menuBar);
   }
   
-  public void setupExtractImageDlg() {
-    container.removeAll();
-    container.repaint();
-    this.setSize(510, 370);
-  
-    GridBagConstraints gridProps = null;
-  
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 0;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Decrypt as:"), gridProps);
-
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 0;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-    container.add(setupKeyNameDropDown(), gridProps);    
-  
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 1;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(new JLabel("Password:"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 1;
-		newPassword1 = new JPasswordField(30);
-		container.add(newPassword1, gridProps);
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 2;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(setupButton("Image to decrypt"), gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 2;
-		gridProps.anchor = GridBagConstraints.LINE_START;
-		imgHideName = new JTextField(30);
-		imgHideName.setText("[No File]");
-		imgHideName.setEditable(false);
-		container.add(imgHideName, gridProps);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 3;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		gridProps.anchor = GridBagConstraints.LINE_END;
-		saveAsButton = setupButton("Save as");
-		container.add(saveAsButton, gridProps);
-		saveAsButton.setEnabled(false);
-		
-		gridProps = new GridBagConstraints();
-		gridProps.gridx = 1;
-		gridProps.gridy = 3;
-		gridProps.anchor = GridBagConstraints.LINE_START;;
-		fileSaveName = new JTextField(30);
-		fileSaveName.setText("[No File]");
-		fileSaveName.setEditable(false);
-		container.add(fileSaveName, gridProps);
-    
-    gridProps = new GridBagConstraints();
-		gridProps.gridx = 0;
-		gridProps.gridy = 4;
-		gridProps.gridwidth = 2;
-		gridProps.fill = GridBagConstraints.HORIZONTAL;
-		container.add(setupButton("Extract File"), gridProps);
-		
-		setVisible(true);
-  }
-  
   public JComboBox setupKeyNameDropDown() {
     String[] keys = (new File(PicryptLib.KEY_STORE)).list();
 		for (int i=0; i<keys.length; i++) { 
@@ -169,54 +94,12 @@ class Picrypt extends JFrame implements ActionListener {
       runTests();   // don't do this is the ui thread
     }
     else if ("Extract File From Image".equals(e.getActionCommand())) {
-      setupExtractImageDlg();
+      ExtractImage dlg = new ExtractImage(this, container);
+      dlg.setupDlg();
     }
     else if ("Hide File In Image".equals(e.getActionCommand())) {
       EmbedImage dlg = new EmbedImage(this, container);
       dlg.setupDlg();
-    }
-    else if ("Save file as".equals(e.getActionCommand())) {
-      JFileChooser fc = new JFileChooser();
-      fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-      fc.addChoosableFileFilter(new ImgFilter());
-      fc.setSelectedFile(new File("picrypt.png"));
-      int returnVal = fc.showSaveDialog(this);
-      
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        imgToSave = fc.getSelectedFile();
-        imgSaveName.setText(imgToSave.getName());
-      }
-    }
-    else if ("Image to decrypt".equals(e.getActionCommand())) {
-      JFileChooser fc = new JFileChooser();
-      fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
-      fc.addChoosableFileFilter(new ImgFilter());
-      int returnVal = fc.showOpenDialog(this);
-      
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        imgToHideIn = fc.getSelectedFile();
-        char[] password = newPassword1.getPassword();
-        if (password.length > 0) {
-          PrivateKey privateKey = PicryptLib.getPrivKey(password, PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
-          fileToSave = new File(PicryptLib.getSuggestedFileName(privateKey, imgToHideIn.getPath()));
-          imgHideName.setText(imgToHideIn.getName());
-          fileSaveName.setText(fileToSave.getName());
-          saveAsButton.setEnabled(true);
-          
-          clearMemory(password);
-        }
-      }      
-    }
-    else if ("Extract File".equals(e.getActionCommand())) {
-      char[] password = newPassword1.getPassword();
-      if (password.length > 0) {
-        PrivateKey privateKey = PicryptLib.getPrivKey(password, PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
-        PicryptLib.extractFile(privateKey, imgToHideIn.getPath(), fileToSave.getPath());
-        
-        clearMemory(password);
-        
-        JOptionPane.showMessageDialog(this, "Done!");
-      } 
     }
     else if ("Create New Contact".equals(e.getActionCommand())) {
       CreateKey dlg = new CreateKey(this, container);
