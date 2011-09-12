@@ -24,12 +24,10 @@ public class EmbedImage implements ActionListener {
   private JTextField toHideName = null;
   private JTextField imgHideName = null;
   private JTextField imgSaveName = null;
-  private JTextField fileSaveName = null;
   
   private File fileToHide = null;
   private File imgToHideIn = null;
   private File imgToSave = null;
-  private File fileToSave = null;
   
   public EmbedImage(JFrame frame, Container container) {
     this.frame = frame;

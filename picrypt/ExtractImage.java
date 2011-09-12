@@ -22,14 +22,10 @@ public class ExtractImage implements ActionListener {
   
   private JButton saveAsButton = null;
   
-  private JTextField toHideName = null;
   private JTextField imgHideName = null;
-  private JTextField imgSaveName = null;
   private JTextField fileSaveName = null;
   
-  private File fileToHide = null;
   private File imgToHideIn = null;
-  private File imgToSave = null;
   private File fileToSave = null;
   
   public ExtractImage(JFrame frame, Container container) {

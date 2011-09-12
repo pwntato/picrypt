@@ -16,8 +16,8 @@ public class ExportKey implements ActionListener {
   private Container container = null;
 
   private JComboBox keyNames = null;
-  private JTextArea pubKey = null;
   private JComboBox keyType = null;
+  private JTextArea pubKey = null;
   
   public ExportKey(JFrame frame, Container container) {
     this.frame = frame;
