@@ -121,12 +121,21 @@ public class ExtractImage implements ActionListener {
         char[] password = newPassword1.getPassword();
         if (password.length > 0) {
           PrivateKey privateKey = PicryptLib.getPrivKey(password, PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
-          fileToSave = new File(PicryptLib.getSuggestedFileName(privateKey, imgToHideIn.getPath()));
-          imgHideName.setText(imgToHideIn.getName());
-          fileSaveName.setText(fileToSave.getName());
-          saveAsButton.setEnabled(true);
+          
+          if (privateKey != null) {
+            fileToSave = new File(PicryptLib.getSuggestedFileName(privateKey, imgToHideIn.getPath()));
+            imgHideName.setText(imgToHideIn.getName());
+            fileSaveName.setText(fileToSave.getName());
+            saveAsButton.setEnabled(true);
+          }
+          else {
+            JOptionPane.showMessageDialog(frame, "Incorrect password");
+          }
           
           Util.clearMemory(password);
+        }
+        else {
+          JOptionPane.showMessageDialog(frame, "Enter your password first");
         }
       }      
     }
@@ -144,12 +153,19 @@ public class ExtractImage implements ActionListener {
       char[] password = newPassword1.getPassword();
       if (password.length > 0) {
         PrivateKey privateKey = PicryptLib.getPrivKey(password, PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");
-        PicryptLib.extractFile(privateKey, imgToHideIn.getPath(), fileToSave.getPath());
         
-        Util.clearMemory(password);
-        
-        JOptionPane.showMessageDialog(frame, "Done!");
+        if (privateKey != null) {
+          PicryptLib.extractFile(privateKey, imgToHideIn.getPath(), fileToSave.getPath());
+          Util.clearMemory(password);
+          JOptionPane.showMessageDialog(frame, "Done!");
+        }
+        else {
+          JOptionPane.showMessageDialog(frame, "Incorrect password");
+        }
       } 
+      else {
+        JOptionPane.showMessageDialog(frame, "Enter your password first");
+      }
     }
   }
 }
