@@ -27,7 +27,7 @@ public class ImportKey implements ActionListener, DocumentListener {
   
   public void setupDlg() {
     container.removeAll();
-    frame.setSize(510, 370);
+    frame.setSize(455, 370);
     container.repaint();
   
     GridBagConstraints gridProps = null;

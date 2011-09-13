@@ -26,7 +26,7 @@ public class ExportKey implements ActionListener {
   
   public void setupDlg() {
     container.removeAll();
-    frame.setSize(510, 370);
+    frame.setSize(455, 370);
     container.repaint();
   
     GridBagConstraints gridProps = null;

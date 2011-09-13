@@ -37,7 +37,7 @@ public class EmbedImage implements ActionListener {
   public void setupDlg() {
     container.removeAll();
     container.repaint();
-    frame.setSize(510, 370);
+    frame.setSize(495, 185);
   
     GridBagConstraints gridProps = null;
   

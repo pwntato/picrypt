@@ -28,7 +28,7 @@ public class ChangePassword implements ActionListener {
   public void setupDlg() {
     container.removeAll();
     container.repaint();
-    frame.setSize(510, 370);
+    frame.setSize(500, 170);
   
     GridBagConstraints gridProps = null;
   
