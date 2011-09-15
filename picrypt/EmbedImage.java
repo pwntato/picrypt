@@ -19,6 +19,7 @@ public class EmbedImage implements ActionListener {
 
   private JComboBox keyNames = null;
   
+  private JLabel capacity = null;
   private JButton saveAsButton = null;
   
   private JTextField toHideName = null;
@@ -37,7 +38,7 @@ public class EmbedImage implements ActionListener {
   public void setupDlg() {
     container.removeAll();
     container.repaint();
-    frame.setSize(495, 185);
+    frame.setSize(495, 200);
   
     GridBagConstraints gridProps = null;
   
@@ -59,32 +60,39 @@ public class EmbedImage implements ActionListener {
 		gridProps.gridy = 1;
 		gridProps.fill = GridBagConstraints.HORIZONTAL;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(Util.setupButton(this, "File to hide"), gridProps);
+		container.add(Util.setupButton(this, "Image to hide in"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
 		gridProps.gridy = 1;
 		gridProps.anchor = GridBagConstraints.LINE_START;
-		toHideName = new JTextField(30);
-		toHideName.setText("[No File]");
-		toHideName.setEditable(false);
-		container.add(toHideName, gridProps);
+		imgHideName = new JTextField(30);
+		imgHideName.setText("[No File]");
+		imgHideName.setEditable(false);
+		container.add(imgHideName, gridProps);
+		
+		gridProps = new GridBagConstraints();
+		gridProps.gridx = 1;
+		gridProps.gridy = 2;
+		gridProps.fill = GridBagConstraints.HORIZONTAL;
+		capacity = new JLabel("Max file size: ");
+		container.add(capacity, gridProps);
     
     gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
 		gridProps.gridy = 3;
 		gridProps.fill = GridBagConstraints.HORIZONTAL;
 		gridProps.anchor = GridBagConstraints.LINE_END;
-		container.add(Util.setupButton(this, "Image to hide in"), gridProps);
+		container.add(Util.setupButton(this, "File to hide"), gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 1;
 		gridProps.gridy = 3;
 		gridProps.anchor = GridBagConstraints.LINE_START;
-		imgHideName = new JTextField(30);
-		imgHideName.setText("[No File]");
-		imgHideName.setEditable(false);
-		container.add(imgHideName, gridProps);
+		toHideName = new JTextField(30);
+		toHideName.setText("[No File]");
+		toHideName.setEditable(false);
+		container.add(toHideName, gridProps);
 		
 		gridProps = new GridBagConstraints();
 		gridProps.gridx = 0;
@@ -113,6 +121,8 @@ public class EmbedImage implements ActionListener {
   }
   
 	public void actionPerformed(ActionEvent e) {
+	  //TODO: sharee a file chooser
+	
 	  if ("File to hide".equals(e.getActionCommand())) {
       JFileChooser fc = new JFileChooser();
       int returnVal = fc.showOpenDialog(frame);
@@ -132,6 +142,7 @@ public class EmbedImage implements ActionListener {
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         imgToHideIn = fc.getSelectedFile();
         imgHideName.setText(imgToHideIn.getName());
+        capacity.setText("Max file size: " + PicryptLib.maxEmbedSizeString(imgToHideIn.getPath()));
       }
     }
     else if ("Save as".equals(e.getActionCommand())) {
@@ -147,14 +158,17 @@ public class EmbedImage implements ActionListener {
       }
     }
     else if ("Hide File".equals(e.getActionCommand())) {
-      if (fileToHide == null) {
-        JOptionPane.showMessageDialog(frame, "You must select a file to hide");
-      }
-      else if (imgToHideIn == null) {
+      if (imgToHideIn == null) {
         JOptionPane.showMessageDialog(frame, "You must select an image to hide in");
+      }
+      else if (fileToHide == null) {
+        JOptionPane.showMessageDialog(frame, "You must select a file to hide");
       }
       else if (imgToSave == null) {
         JOptionPane.showMessageDialog(frame, "You must select where to save the new image");
+      }
+      else if (fileToHide.length() > PicryptLib.maxEmbedSize(imgToHideIn.getPath())) {
+        JOptionPane.showMessageDialog(frame, "This file is too big to fit in this image, please select a larger image");
       }
       else {
         PublicKey publicKey = PicryptLib.getPubKey(PicryptLib.KEY_STORE + ((String)keyNames.getSelectedItem()).replace(' ', '_') + ".key");

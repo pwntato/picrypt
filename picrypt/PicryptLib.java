@@ -74,6 +74,16 @@ public abstract class PicryptLib {
     return suggestedName;
   }
   
+  public static double maxEmbedSize(String imgPath) {
+    StegImg stegimg = new StegImg(imgPath);
+    return stegimg.maxEmbedSize();
+  }
+  
+  public static String maxEmbedSizeString(String imgPath) {
+    StegImg stegimg = new StegImg(imgPath);
+    return stegimg.maxEmbedSizeString();
+  }
+  
   public static  PublicKey getPubKey(String path) {
     byte[] keyAsBytes = getFileAsBytes(path);
     byte[] pubKeyAsBytes = sliceArray(keyAsBytes, 0, PUB_KEY_SIZE);

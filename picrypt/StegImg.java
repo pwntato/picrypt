@@ -4,6 +4,8 @@ import java.io.*;
 import javax.imageio.*;
 import java.awt.image.BufferedImage;
 
+import java.text.*;
+
 public class StegImg {
   private BufferedImage img;
 
@@ -11,6 +13,45 @@ public class StegImg {
     try {
         img = ImageIO.read(new File(imagePath));
     } catch (IOException e) { System.out.println(e); }
+  }
+  
+  public double maxEmbedSize() {
+    double size = img.getWidth() * img.getHeight();    
+    size *= 6.0/8.0;      // 6 bits per pixel, 8 bits per byte
+    size -= RSA.HEADER_LENGTH;
+    size -= 16;           // bonus iv block
+    
+    return size;
+  }
+  
+  public String maxEmbedSizeString() {
+    double size = maxEmbedSize();
+    int magnitude = 0;
+    String strSize = "";
+    
+    while (size > 1028) {
+      size /= 1028;
+      magnitude++;
+    }
+    
+    DecimalFormat df = new DecimalFormat("#.##");
+    strSize = df.format(size);
+    switch (magnitude) {
+      case 0:
+        strSize += " B";
+        break;
+      case 1:
+        strSize += " KB";
+        break;
+      case 2:
+        strSize += " MB";
+        break;
+      case 3:
+        strSize += " GB";
+        break;        
+    }
+    
+    return strSize;
   }
   
   public void saveImg(String imagePath) {
