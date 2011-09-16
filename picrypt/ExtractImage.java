@@ -28,9 +28,13 @@ public class ExtractImage implements ActionListener {
   private File imgToHideIn = null;
   private File fileToSave = null;
   
+  private JFileChooser fc;
+  
   public ExtractImage(JFrame frame, Container container) {
     this.frame = frame;
     this.container = container;
+    
+    fc = new JFileChooser();
   }
   
   public void setupDlg() {
@@ -111,8 +115,9 @@ public class ExtractImage implements ActionListener {
   
   public void actionPerformed(ActionEvent e) {
     if ("Image to decrypt".equals(e.getActionCommand())) {
-      JFileChooser fc = new JFileChooser();
+      fc.resetChoosableFileFilters();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+      fc.setSelectedFile(new File(""));
       fc.addChoosableFileFilter(new ImgFilter(true));
       int returnVal = fc.showOpenDialog(frame);
       
@@ -140,8 +145,8 @@ public class ExtractImage implements ActionListener {
       }      
     }
     else if ("Save file as".equals(e.getActionCommand())) {
-      JFileChooser fc = new JFileChooser();
-      fc.setSelectedFile(fileToSave);
+      fc.resetChoosableFileFilters();
+      fc.setSelectedFile(new File(""));
       int returnVal = fc.showSaveDialog(frame);
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {

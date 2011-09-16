@@ -30,9 +30,13 @@ public class EmbedImage implements ActionListener {
   private File imgToHideIn = null;
   private File imgToSave = null;
   
+  private JFileChooser fc;
+  
   public EmbedImage(JFrame frame, Container container) {
     this.frame = frame;
     this.container = container;
+    
+    fc = new JFileChooser();
   }
   
   public void setupDlg() {
@@ -120,11 +124,10 @@ public class EmbedImage implements ActionListener {
 		frame.setVisible(true);
   }
   
-	public void actionPerformed(ActionEvent e) {
-	  //TODO: sharee a file chooser
-	
+	public void actionPerformed(ActionEvent e) {	
 	  if ("File to hide".equals(e.getActionCommand())) {
-      JFileChooser fc = new JFileChooser();
+      fc.resetChoosableFileFilters();
+      fc.setSelectedFile(new File(""));
       int returnVal = fc.showOpenDialog(frame);
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -134,9 +137,10 @@ public class EmbedImage implements ActionListener {
       }
     }
     else if ("Image to hide in".equals(e.getActionCommand())) {
-      JFileChooser fc = new JFileChooser();
+      fc.resetChoosableFileFilters();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
       fc.addChoosableFileFilter(new ImgFilter(false));
+      fc.setSelectedFile(new File(""));
       int returnVal = fc.showOpenDialog(frame);
       
       if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -146,7 +150,7 @@ public class EmbedImage implements ActionListener {
       }
     }
     else if ("Save as".equals(e.getActionCommand())) {
-      JFileChooser fc = new JFileChooser();
+      fc.resetChoosableFileFilters();
       fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
       fc.addChoosableFileFilter(new ImgFilter(true));
       fc.setSelectedFile(new File("picrypt.png"));
